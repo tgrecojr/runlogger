@@ -1,0 +1,65 @@
+# Rust build artifacts
+/target/
+**/*.rs.bk
+*.pdb
+
+# Cargo
+# Note: Cargo.lock is committed for binary projects to ensure reproducible builds
+# Uncomment the line below if this becomes a library project:
+# Cargo.lock
+
+# SQLite databases (user data)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.*.sw?
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.orig
+
+# Test artifacts
+*.profraw
+*.profdata
+
+# Environment files
+.env
+.env.local

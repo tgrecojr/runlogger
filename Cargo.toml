@@ -1,0 +1,27 @@
+[package]
+name = "runlogger"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# TUI Framework
+ratatui = "0.28"
+crossterm = "0.28"
+
+# Database
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# Date/Time
+chrono = "0.4"
+
+# Error Handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Utility
+dirs = "5.0"
+
+[profile.release]
+strip = true
+lto = true
+codegen-units = 1

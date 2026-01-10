@@ -1,0 +1,102 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":disableRateLimiting",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":timezone(America/New_York)"
+  ],
+  "schedule": [
+    "after 10pm every weekday",
+    "before 5am every weekday",
+    "every weekend"
+  ],
+  "prConcurrentLimit": 3,
+  "prCreation": "immediate",
+  "rebaseWhen": "behind-base-branch",
+  "automerge": true,
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Group all minor and patch updates together",
+      "matchDatasources": [
+        "crate"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "all non-major dependencies",
+      "groupSlug": "all-minor-patch",
+      "automerge": true
+    },
+    {
+      "description": "Disable auto-merge for major updates - need review",
+      "matchDatasources": [
+        "crate"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false,
+      "labels": [
+        "major-update"
+      ]
+    },
+    {
+      "description": "Stability period for minor/patch before auto-merge",
+      "matchDatasources": [
+        "crate"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "description": "Core stable crates - faster auto-merge",
+      "matchDatasources": [
+        "crate"
+      ],
+      "matchPackageNames": [
+        "chrono",
+        "anyhow",
+        "thiserror",
+        "serde",
+        "tokio"
+      ],
+      "minimumReleaseAge": "1 day"
+    },
+    {
+      "description": "UI framework updates - review carefully due to potential breaking changes",
+      "matchDatasources": [
+        "crate"
+      ],
+      "matchPackageNames": [
+        "ratatui",
+        "crossterm"
+      ],
+      "automerge": false,
+      "labels": [
+        "ui-update"
+      ]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": [
+      "security"
+    ]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 4am on monday"
+    ]
+  },
+  "cargo": {
+    "enabled": true
+  }
+}
