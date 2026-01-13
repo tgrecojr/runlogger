@@ -161,7 +161,7 @@ fn handle_key_event(app: &mut App, key: KeyEvent, conn: &Connection) -> Result<(
 
     // Handle other screens
     match app.screen {
-        Screen::QuickEntry => {}, // Already handled above
+        Screen::QuickEntry => {} // Already handled above
         Screen::RunList => handle_run_list_input(app, key, conn)?,
         Screen::Analytics => {}
         Screen::Help => {}
@@ -225,7 +225,8 @@ fn handle_quick_entry_input(app: &mut App, key: KeyEvent, conn: &Connection) -> 
                                             state.success_message = Some(success_msg);
                                         }
                                         Err(e) => {
-                                            state.error_message = Some(format!("Database error: {}", e));
+                                            state.error_message =
+                                                Some(format!("Database error: {}", e));
                                         }
                                     }
                                 }
@@ -256,7 +257,8 @@ fn handle_quick_entry_input(app: &mut App, key: KeyEvent, conn: &Connection) -> 
                         // Drop the state reference to allow borrowing app mutably
                         let _ = state;
                         if let Err(e) = load_runs(app, conn) {
-                            app.quick_entry_state.error_message = Some(format!("Failed to reload runs: {}", e));
+                            app.quick_entry_state.error_message =
+                                Some(format!("Failed to reload runs: {}", e));
                         } else {
                             app.switch_to_screen(Screen::RunList);
                         }

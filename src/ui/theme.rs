@@ -11,9 +11,7 @@ pub fn unfocused_input_style() -> Style {
 }
 
 pub fn error_style() -> Style {
-    Style::default()
-        .fg(Color::Red)
-        .add_modifier(Modifier::BOLD)
+    Style::default().fg(Color::Red).add_modifier(Modifier::BOLD)
 }
 
 pub fn success_style() -> Style {
@@ -35,6 +33,5 @@ pub fn goal_met_style() -> Style {
 }
 
 pub fn goal_not_met_style() -> Style {
-    Style::default()
-        .fg(Color::Red)
+    Style::default().fg(Color::Red)
 }

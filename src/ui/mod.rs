@@ -5,10 +5,10 @@ pub mod theme;
 use crate::app::{App, Screen};
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    Frame,
     style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
+    Frame,
 };
 
 pub fn render(f: &mut Frame, app: &App) {
@@ -71,7 +71,9 @@ fn render_screen(f: &mut Frame, area: Rect, app: &App) {
 
 fn render_footer(f: &mut Frame, area: Rect, current_screen: Screen) {
     let footer_text = match current_screen {
-        Screen::QuickEntry => "[Tab] Next  [Shift+Tab] Prev  [Enter] Submit  [Esc] Clear  [h] Help  [Ctrl+Q] Quit",
+        Screen::QuickEntry => {
+            "[Tab] Next  [Shift+Tab] Prev  [Enter] Submit  [Esc] Clear  [h] Help  [Ctrl+Q] Quit"
+        }
         Screen::RunList => "[↑↓] Navigate  [1-3] Switch screen  [h] Help  [q] Quit",
         Screen::Analytics => "[1-3] Switch screen  [h] Help  [q] Quit",
         Screen::Help => "[1-3] Switch screen  [q] Quit",

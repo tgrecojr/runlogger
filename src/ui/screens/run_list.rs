@@ -1,10 +1,10 @@
 use crate::app::RunListState;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    Frame,
     style::{Color, Modifier, Style},
     text::Line,
     widgets::{Block, Borders, Cell, Paragraph, Row, Table},
+    Frame,
 };
 
 pub fn render(f: &mut Frame, area: Rect, state: &RunListState) {
@@ -12,8 +12,8 @@ pub fn render(f: &mut Frame, area: Rect, state: &RunListState) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Min(10),     // Table
-            Constraint::Length(3),   // Hints
+            Constraint::Min(10),   // Table
+            Constraint::Length(3), // Hints
         ])
         .split(area);
 
@@ -30,9 +30,13 @@ pub fn render(f: &mut Frame, area: Rect, state: &RunListState) {
         return;
     }
 
-    let header_cells = ["Date", "Time", "Distance (mi)", "Note"]
-        .iter()
-        .map(|h| Cell::from(*h).style(Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)));
+    let header_cells = ["Date", "Time", "Distance (mi)", "Note"].iter().map(|h| {
+        Cell::from(*h).style(
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        )
+    });
     let header = Row::new(header_cells).height(1).bottom_margin(1);
 
     let rows: Vec<Row> = state

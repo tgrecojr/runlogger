@@ -1,7 +1,7 @@
-use chrono::Local;
 use crate::logic::validation;
-use crate::models::run::Run;
 use crate::models::analytics::Analytics;
+use crate::models::run::Run;
+use chrono::Local;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Screen {

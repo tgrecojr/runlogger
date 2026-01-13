@@ -1,7 +1,7 @@
+use crate::models::analytics::{Analytics, DailyData};
+use crate::models::run::Run;
 use chrono::{Datelike, Local, NaiveDate};
 use std::collections::BTreeMap;
-use crate::models::run::Run;
-use crate::models::analytics::{Analytics, DailyData};
 
 const DAILY_GOAL_MILES: f64 = 1.0;
 
@@ -33,6 +33,13 @@ pub fn calculate_analytics(runs: &[Run]) -> Analytics {
 
     let recent_trend = calculate_recent_trend(&daily_totals, 30);
 
+    // Calculate days remaining to year goal (365 days with at least 1 mile each)
+    let days_with_goal_met_this_year = daily_totals
+        .iter()
+        .filter(|(&date, &distance)| date >= year_start && distance >= DAILY_GOAL_MILES)
+        .count() as i32;
+    let days_remaining_to_year_goal = 365 - days_with_goal_met_this_year;
+
     Analytics {
         current_streak,
         longest_streak,
@@ -43,6 +50,7 @@ pub fn calculate_analytics(runs: &[Run]) -> Analytics {
         runs_this_month,
         runs_this_year,
         recent_trend,
+        days_remaining_to_year_goal,
     }
 }
 

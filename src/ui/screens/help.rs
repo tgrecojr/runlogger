@@ -1,9 +1,9 @@
 use ratatui::{
     layout::Rect,
-    Frame,
     style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Wrap},
+    Frame,
 };
 
 pub fn render(f: &mut Frame, area: Rect) {
@@ -16,7 +16,10 @@ pub fn render(f: &mut Frame, area: Rect) {
                 .add_modifier(Modifier::BOLD),
         )),
         Line::from(""),
-        Line::from(Span::styled("Navigation:", Style::default().fg(Color::Cyan))),
+        Line::from(Span::styled(
+            "Navigation:",
+            Style::default().fg(Color::Cyan),
+        )),
         Line::from("  [Esc] then [1/2/3] - Switch screens (works from anywhere)"),
         Line::from("    - Esc → 1: Quick Entry"),
         Line::from("    - Esc → 2: Run List"),
@@ -48,15 +51,14 @@ pub fn render(f: &mut Frame, area: Rect) {
         Line::from(""),
         Line::from(Span::styled(
             "Your Goal:",
-            Style::default().fg(Color::Green).add_modifier(Modifier::BOLD),
+            Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD),
         )),
         Line::from("  Run at least 1 mile every day!"),
         Line::from("  Multiple runs on the same day count toward your goal."),
         Line::from(""),
-        Line::from(Span::styled(
-            "Tips:",
-            Style::default().fg(Color::Yellow),
-        )),
+        Line::from(Span::styled("Tips:", Style::default().fg(Color::Yellow))),
         Line::from("  - Date and time are pre-filled with current values"),
         Line::from("  - Just enter distance and optionally a note"),
         Line::from("  - Distance must be positive (e.g., 3.5 for 3.5 miles)"),
