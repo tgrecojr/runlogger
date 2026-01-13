@@ -39,6 +39,7 @@ pub fn calculate_analytics(runs: &[Run]) -> Analytics {
         .filter(|(&date, &distance)| date >= year_start && distance >= DAILY_GOAL_MILES)
         .count() as i32;
     let days_remaining_to_year_goal = 365 - days_with_goal_met_this_year;
+    let year_goal_completion_percentage = (days_with_goal_met_this_year as f64 / 365.0) * 100.0;
 
     Analytics {
         current_streak,
@@ -51,6 +52,7 @@ pub fn calculate_analytics(runs: &[Run]) -> Analytics {
         runs_this_year,
         recent_trend,
         days_remaining_to_year_goal,
+        year_goal_completion_percentage,
     }
 }
 

@@ -46,9 +46,13 @@ fn render_streak(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     };
 
     let days_remaining_text = if state.analytics.days_remaining_to_year_goal <= 0 {
-        "Goal Complete! 🎉".to_string()
+        "Goal Complete! 🎉 (100.0%)".to_string()
     } else {
-        format!("{} days", state.analytics.days_remaining_to_year_goal)
+        format!(
+            "{} days ({:.1}%)",
+            state.analytics.days_remaining_to_year_goal,
+            state.analytics.year_goal_completion_percentage
+        )
     };
 
     let text = vec![
