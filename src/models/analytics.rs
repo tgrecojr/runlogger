@@ -11,6 +11,7 @@ pub struct Analytics {
     pub runs_this_month: u32,
     pub runs_this_year: u32,
     pub recent_trend: Vec<DailyData>,
+    pub days_remaining_to_year_goal: i32,
 }
 
 #[derive(Debug, Clone)]
@@ -31,6 +32,7 @@ impl Analytics {
             runs_this_month: 0,
             runs_this_year: 0,
             recent_trend: Vec::new(),
+            days_remaining_to_year_goal: 365,
         }
     }
 }

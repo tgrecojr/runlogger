@@ -2,10 +2,10 @@ use crate::app::AnalyticsState;
 use crate::ui::theme;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    Frame,
     style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
+    Frame,
 };
 
 pub fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
@@ -13,7 +13,7 @@ pub fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         .direction(Direction::Vertical)
         .margin(1)
         .constraints([
-            Constraint::Length(5),
+            Constraint::Length(6),
             Constraint::Length(10),
             Constraint::Min(0),
         ])
@@ -31,6 +31,26 @@ fn render_streak(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         theme::goal_not_met_style()
     };
 
+    let days_remaining_style = if state.analytics.days_remaining_to_year_goal <= 0 {
+        Style::default()
+            .fg(Color::Green)
+            .add_modifier(Modifier::BOLD)
+    } else if state.analytics.days_remaining_to_year_goal < 100 {
+        Style::default()
+            .fg(Color::Yellow)
+            .add_modifier(Modifier::BOLD)
+    } else {
+        Style::default()
+            .fg(Color::White)
+            .add_modifier(Modifier::BOLD)
+    };
+
+    let days_remaining_text = if state.analytics.days_remaining_to_year_goal <= 0 {
+        "Goal Complete! 🎉".to_string()
+    } else {
+        format!("{} days", state.analytics.days_remaining_to_year_goal)
+    };
+
     let text = vec![
         Line::from(vec![
             Span::styled("Current Streak: ", Style::default().fg(Color::Cyan)),
@@ -43,13 +63,22 @@ fn render_streak(f: &mut Frame, area: Rect, state: &AnalyticsState) {
             Span::styled("Longest Streak: ", Style::default().fg(Color::Cyan)),
             Span::styled(
                 format!("{} days", state.analytics.longest_streak),
-                Style::default().fg(Color::White).add_modifier(Modifier::BOLD),
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD),
             ),
+        ]),
+        Line::from(vec![
+            Span::styled(
+                "Year Goal (365 days @ 1mi): ",
+                Style::default().fg(Color::Cyan),
+            ),
+            Span::styled(days_remaining_text, days_remaining_style),
         ]),
     ];
 
-    let streak_block = Paragraph::new(text)
-        .block(Block::default().borders(Borders::ALL).title("Streaks"));
+    let streak_block =
+        Paragraph::new(text).block(Block::default().borders(Borders::ALL).title("Streaks"));
 
     f.render_widget(streak_block, area);
 }
@@ -67,10 +96,7 @@ fn render_stats(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     let total_text = vec![
         Line::from(vec![
             Span::styled("Total Runs: ", Style::default().fg(Color::Gray)),
-            Span::styled(
-                state.analytics.total_runs.to_string(),
-                theme::stat_style(),
-            ),
+            Span::styled(state.analytics.total_runs.to_string(), theme::stat_style()),
         ]),
         Line::from(vec![
             Span::styled("Total Distance: ", Style::default().fg(Color::Gray)),
@@ -88,22 +114,20 @@ fn render_stats(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         ]),
     ];
 
-    let total_block = Paragraph::new(total_text)
-        .block(Block::default().borders(Borders::ALL).title("Totals"));
+    let total_block =
+        Paragraph::new(total_text).block(Block::default().borders(Borders::ALL).title("Totals"));
     f.render_widget(total_block, chunks[0]);
 
-    let weekly_text = vec![
-        Line::from(vec![
-            Span::styled("This Week: ", Style::default().fg(Color::Gray)),
-            Span::styled(
-                format!("{} runs", state.analytics.runs_this_week),
-                theme::stat_style(),
-            ),
-        ]),
-    ];
+    let weekly_text = vec![Line::from(vec![
+        Span::styled("This Week: ", Style::default().fg(Color::Gray)),
+        Span::styled(
+            format!("{} runs", state.analytics.runs_this_week),
+            theme::stat_style(),
+        ),
+    ])];
 
-    let weekly_block = Paragraph::new(weekly_text)
-        .block(Block::default().borders(Borders::ALL).title("Week"));
+    let weekly_block =
+        Paragraph::new(weekly_text).block(Block::default().borders(Borders::ALL).title("Week"));
     f.render_widget(weekly_block, chunks[1]);
 
     let yearly_text = vec![
@@ -123,8 +147,8 @@ fn render_stats(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         ]),
     ];
 
-    let yearly_block = Paragraph::new(yearly_text)
-        .block(Block::default().borders(Borders::ALL).title("Period"));
+    let yearly_block =
+        Paragraph::new(yearly_text).block(Block::default().borders(Borders::ALL).title("Period"));
     f.render_widget(yearly_block, chunks[2]);
 }
 
@@ -150,7 +174,9 @@ fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     let mut text_lines = vec![
         Line::from(Span::styled(
             "Daily Mileage (Green = Goal Met ≥1.0 mi)",
-            Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD),
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
         )),
         Line::from(""),
     ];
@@ -160,7 +186,9 @@ fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         let distance_str = format!("{:.2} mi", day_data.distance);
 
         let style = if day_data.distance >= 1.0 {
-            Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)
+            Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD)
         } else if day_data.distance > 0.0 {
             Style::default().fg(Color::Yellow)
         } else {
