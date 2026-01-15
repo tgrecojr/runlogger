@@ -31,6 +31,40 @@ pub fn calculate_analytics(runs: &[Run]) -> Analytics {
     let runs_this_month = runs.iter().filter(|r| r.date >= month_start).count() as u32;
     let runs_this_year = runs.iter().filter(|r| r.date >= year_start).count() as u32;
 
+    // Calculate average distances for different time periods
+    let distance_this_week: f64 = runs
+        .iter()
+        .filter(|r| r.date >= week_start)
+        .map(|r| r.distance_miles)
+        .sum();
+    let average_distance_this_week = if runs_this_week > 0 {
+        distance_this_week / runs_this_week as f64
+    } else {
+        0.0
+    };
+
+    let distance_this_month: f64 = runs
+        .iter()
+        .filter(|r| r.date >= month_start)
+        .map(|r| r.distance_miles)
+        .sum();
+    let average_distance_this_month = if runs_this_month > 0 {
+        distance_this_month / runs_this_month as f64
+    } else {
+        0.0
+    };
+
+    let distance_this_year: f64 = runs
+        .iter()
+        .filter(|r| r.date >= year_start)
+        .map(|r| r.distance_miles)
+        .sum();
+    let average_distance_this_year = if runs_this_year > 0 {
+        distance_this_year / runs_this_year as f64
+    } else {
+        0.0
+    };
+
     let recent_trend = calculate_recent_trend(&daily_totals, 30);
 
     // Calculate days remaining to year goal (365 days with at least 1 mile each)
@@ -53,6 +87,9 @@ pub fn calculate_analytics(runs: &[Run]) -> Analytics {
         recent_trend,
         days_remaining_to_year_goal,
         year_goal_completion_percentage,
+        average_distance_this_week,
+        average_distance_this_month,
+        average_distance_this_year,
     }
 }
 

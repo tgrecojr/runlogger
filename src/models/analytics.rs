@@ -13,6 +13,9 @@ pub struct Analytics {
     pub recent_trend: Vec<DailyData>,
     pub days_remaining_to_year_goal: i32,
     pub year_goal_completion_percentage: f64,
+    pub average_distance_this_week: f64,
+    pub average_distance_this_month: f64,
+    pub average_distance_this_year: f64,
 }
 
 #[derive(Debug, Clone)]
@@ -35,6 +38,9 @@ impl Analytics {
             recent_trend: Vec::new(),
             days_remaining_to_year_goal: 365,
             year_goal_completion_percentage: 0.0,
+            average_distance_this_week: 0.0,
+            average_distance_this_month: 0.0,
+            average_distance_this_year: 0.0,
         }
     }
 }

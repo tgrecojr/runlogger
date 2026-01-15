@@ -122,13 +122,22 @@ fn render_stats(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         Paragraph::new(total_text).block(Block::default().borders(Borders::ALL).title("Totals"));
     f.render_widget(total_block, chunks[0]);
 
-    let weekly_text = vec![Line::from(vec![
-        Span::styled("This Week: ", Style::default().fg(Color::Gray)),
-        Span::styled(
-            format!("{} runs", state.analytics.runs_this_week),
-            theme::stat_style(),
-        ),
-    ])];
+    let weekly_text = vec![
+        Line::from(vec![
+            Span::styled("This Week: ", Style::default().fg(Color::Gray)),
+            Span::styled(
+                format!("{} runs", state.analytics.runs_this_week),
+                theme::stat_style(),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("Avg Distance: ", Style::default().fg(Color::Gray)),
+            Span::styled(
+                format!("{:.2} mi", state.analytics.average_distance_this_week),
+                theme::stat_style(),
+            ),
+        ]),
+    ];
 
     let weekly_block =
         Paragraph::new(weekly_text).block(Block::default().borders(Borders::ALL).title("Week"));
@@ -143,9 +152,23 @@ fn render_stats(f: &mut Frame, area: Rect, state: &AnalyticsState) {
             ),
         ]),
         Line::from(vec![
+            Span::styled("Avg: ", Style::default().fg(Color::Gray)),
+            Span::styled(
+                format!("{:.2} mi", state.analytics.average_distance_this_month),
+                theme::stat_style(),
+            ),
+        ]),
+        Line::from(vec![
             Span::styled("This Year: ", Style::default().fg(Color::Gray)),
             Span::styled(
                 format!("{} runs", state.analytics.runs_this_year),
+                theme::stat_style(),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("Avg: ", Style::default().fg(Color::Gray)),
+            Span::styled(
+                format!("{:.2} mi", state.analytics.average_distance_this_year),
                 theme::stat_style(),
             ),
         ]),
