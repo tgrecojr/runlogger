@@ -14,8 +14,8 @@ pub fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         .margin(1)
         .constraints([
             Constraint::Length(6),  // Streaks
-            Constraint::Length(10), // Stats
-            Constraint::Length(18), // Last 14 Days
+            Constraint::Length(8),  // Stats
+            Constraint::Length(12), // Last 7 Days
             Constraint::Min(0),     // Monthly Totals
         ])
         .split(area);
@@ -184,19 +184,19 @@ fn render_stats(f: &mut Frame, area: Rect, state: &AnalyticsState) {
 fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     if state.analytics.recent_trend.is_empty() {
         let empty = Paragraph::new("No data to display")
-            .block(Block::default().borders(Borders::ALL).title("Last 30 Days"))
+            .block(Block::default().borders(Borders::ALL).title("Last 7 Days"))
             .style(Style::default().fg(Color::Gray));
         f.render_widget(empty, area);
         return;
     }
 
-    // Show last 14 days of data with color coding
+    // Show last 7 days of data with color coding
     let recent_data: Vec<_> = state
         .analytics
         .recent_trend
         .iter()
         .rev()
-        .take(14)
+        .take(7)
         .rev()
         .collect();
 
@@ -237,7 +237,7 @@ fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     }
 
     let chart = Paragraph::new(text_lines)
-        .block(Block::default().borders(Borders::ALL).title("Last 14 Days"));
+        .block(Block::default().borders(Borders::ALL).title("Last 7 Days"));
 
     f.render_widget(chart, area);
 }
