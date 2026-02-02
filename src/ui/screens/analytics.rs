@@ -13,15 +13,17 @@ pub fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         .direction(Direction::Vertical)
         .margin(1)
         .constraints([
-            Constraint::Length(6),
-            Constraint::Length(10),
-            Constraint::Min(0),
+            Constraint::Length(6),  // Streaks
+            Constraint::Length(10), // Stats
+            Constraint::Length(18), // Last 14 Days
+            Constraint::Min(0),     // Monthly Totals
         ])
         .split(area);
 
     render_streak(f, chunks[0], state);
     render_stats(f, chunks[1], state);
     render_chart(f, chunks[2], state);
+    render_monthly_breakdown(f, chunks[3], state);
 }
 
 fn render_streak(f: &mut Frame, area: Rect, state: &AnalyticsState) {
@@ -238,4 +240,83 @@ fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         .block(Block::default().borders(Borders::ALL).title("Last 14 Days"));
 
     f.render_widget(chart, area);
+}
+
+fn render_monthly_breakdown(f: &mut Frame, area: Rect, state: &AnalyticsState) {
+    if state.analytics.monthly_breakdown.is_empty() {
+        let empty = Paragraph::new("No data to display")
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .title("Mileage by Month"),
+            )
+            .style(Style::default().fg(Color::Gray));
+        f.render_widget(empty, area);
+        return;
+    }
+
+    let mut text_lines = vec![
+        Line::from(Span::styled(
+            "Monthly Totals (Green ≥50 mi, Yellow ≥25 mi)",
+            Style::default()
+                .fg(Color::Cyan)
+                .add_modifier(Modifier::BOLD),
+        )),
+        Line::from(""),
+    ];
+
+    for month_data in &state.analytics.monthly_breakdown {
+        let month_str = format!("{} {}", month_abbrev(month_data.month), month_data.year);
+
+        let style = if month_data.total_distance >= 50.0 {
+            Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD)
+        } else if month_data.total_distance >= 25.0 {
+            Style::default().fg(Color::Yellow)
+        } else {
+            Style::default().fg(Color::White)
+        };
+
+        text_lines.push(Line::from(vec![
+            Span::styled(
+                format!("{:<9}", month_str),
+                Style::default().fg(Color::Gray),
+            ),
+            Span::styled(format!("{:>6.1} mi", month_data.total_distance), style),
+            Span::styled(
+                format!(
+                    "  ({} runs, {:.1} avg)",
+                    month_data.run_count, month_data.average_distance
+                ),
+                Style::default().fg(Color::Gray),
+            ),
+        ]));
+    }
+
+    let monthly_block = Paragraph::new(text_lines).block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title("Mileage by Month"),
+    );
+
+    f.render_widget(monthly_block, area);
+}
+
+fn month_abbrev(month: u32) -> &'static str {
+    match month {
+        1 => "Jan",
+        2 => "Feb",
+        3 => "Mar",
+        4 => "Apr",
+        5 => "May",
+        6 => "Jun",
+        7 => "Jul",
+        8 => "Aug",
+        9 => "Sep",
+        10 => "Oct",
+        11 => "Nov",
+        12 => "Dec",
+        _ => "???",
+    }
 }

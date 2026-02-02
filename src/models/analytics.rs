@@ -16,12 +16,22 @@ pub struct Analytics {
     pub average_distance_this_week: f64,
     pub average_distance_this_month: f64,
     pub average_distance_this_year: f64,
+    pub monthly_breakdown: Vec<MonthlyData>,
 }
 
 #[derive(Debug, Clone)]
 pub struct DailyData {
     pub date: NaiveDate,
     pub distance: f64,
+}
+
+#[derive(Debug, Clone)]
+pub struct MonthlyData {
+    pub year: i32,
+    pub month: u32,
+    pub total_distance: f64,
+    pub run_count: u32,
+    pub average_distance: f64,
 }
 
 impl Analytics {
@@ -41,6 +51,7 @@ impl Analytics {
             average_distance_this_week: 0.0,
             average_distance_this_month: 0.0,
             average_distance_this_year: 0.0,
+            monthly_breakdown: Vec::new(),
         }
     }
 }
