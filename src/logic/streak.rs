@@ -1,9 +1,10 @@
-use crate::models::analytics::{Analytics, DailyData};
+use crate::models::analytics::{Analytics, DailyData, MonthlyData};
 use crate::models::run::Run;
 use chrono::{Datelike, Local, NaiveDate};
 use std::collections::BTreeMap;
 
 const DAILY_GOAL_MILES: f64 = 1.0;
+const MONTHS_TO_SHOW: usize = 12;
 
 pub fn calculate_analytics(runs: &[Run]) -> Analytics {
     if runs.is_empty() {
@@ -66,6 +67,7 @@ pub fn calculate_analytics(runs: &[Run]) -> Analytics {
     };
 
     let recent_trend = calculate_recent_trend(&daily_totals, 30);
+    let monthly_breakdown = calculate_monthly_breakdown(runs, MONTHS_TO_SHOW);
 
     // Calculate days remaining to year goal (365 days with at least 1 mile each)
     let days_with_goal_met_this_year = daily_totals
@@ -90,6 +92,7 @@ pub fn calculate_analytics(runs: &[Run]) -> Analytics {
         average_distance_this_week,
         average_distance_this_month,
         average_distance_this_year,
+        monthly_breakdown,
     }
 }
 
@@ -178,4 +181,43 @@ fn calculate_recent_trend(daily_totals: &BTreeMap<NaiveDate, f64>, days: i64) ->
     }
 
     trend
+}
+
+fn calculate_monthly_breakdown(runs: &[Run], months: usize) -> Vec<MonthlyData> {
+    // Group runs by (year, month)
+    let mut monthly_totals: BTreeMap<(i32, u32), (f64, u32)> = BTreeMap::new();
+
+    for run in runs {
+        let key = (run.date.year(), run.date.month());
+        let entry = monthly_totals.entry(key).or_insert((0.0, 0));
+        entry.0 += run.distance_miles;
+        entry.1 += 1;
+    }
+
+    // Convert to Vec<MonthlyData> and sort descending (newest first)
+    let mut result: Vec<MonthlyData> = monthly_totals
+        .into_iter()
+        .map(|((year, month), (total_distance, run_count))| {
+            let average_distance = if run_count > 0 {
+                total_distance / run_count as f64
+            } else {
+                0.0
+            };
+            MonthlyData {
+                year,
+                month,
+                total_distance,
+                run_count,
+                average_distance,
+            }
+        })
+        .collect();
+
+    // Sort descending by year, then month (newest first)
+    result.sort_by(|a, b| b.year.cmp(&a.year).then_with(|| b.month.cmp(&a.month)));
+
+    // Truncate to requested number of months
+    result.truncate(months);
+
+    result
 }
