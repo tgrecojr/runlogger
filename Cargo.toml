@@ -19,7 +19,7 @@ anyhow = "1.0"
 thiserror = "1.0"
 
 # Utility
-dirs = "5.0"
+dirs = "6.0"
 
 [profile.release]
 strip = true
