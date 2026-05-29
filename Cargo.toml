@@ -9,7 +9,7 @@ ratatui = "0.30"
 crossterm = "0.29"
 
 # Database
-rusqlite = { version = "0.39", features = ["bundled"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
 
 # Date/Time
 chrono = "0.4"
