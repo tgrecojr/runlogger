@@ -13,7 +13,7 @@ The central constraint is that Quick Entry must accept *any* typed character, in
 
 Navigation owns: startup and shutdown order, terminal setup/restore and the panic hook, the event loop, global key routing (quit keys, the Esc prefix, direct screen keys), the `App`/`Screen` state, the header, the footer, the Help screen, and `theme.rs`. It triggers, but does not own, each screen's data load (`RL-001`, `AN-008`), Quick Entry's clear (`QE-007`) and edit cancel (`QE-023`).
 
-Code: `src/main.rs` (`main`), `src/lifecycle.rs` (`start`, `with_restore`, `install_panic_hook`, `run_app`, `EventSource`), `handle_key_event` in `src/input/mod.rs`, `Screen` and `App` in `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`, `src/ui/components/*`.
+Code: `src/main.rs` (`main`), `src/lifecycle.rs` (`start`, `with_restore`, `install_panic_hook`, `run_app`, `EventSource`), `handle_key_event` in `src/input/mod.rs`, `Screen` and `App` in `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`.
 
 ## Lifecycle
 
@@ -75,7 +75,7 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 While the key after Esc is awaited, the footer turns into that menu, so the user can see that the next key is a command and what it can do; the next key restores the normal footer.
 
 - **Help screen** (`src/ui/screens/help.rs`) — static reference in sections: Navigation (Esc commands work everywhere; direct `1`–`3`, `h`, `?`, `q` everywhere except Quick Entry, where keys type text), Quick Entry (fields, save, clear, Time refreshing after a save, no future runs, leaving mid-edit cancels the edit), Run List (select, edit, delete without confirmation), Your Goal (a mile a day, runs on one day add up, today counts once its mile is logged), and Data Location — the full path of the database actually in use, which `main` stores on `App` as `db_location` after opening it (`NAV-015`).
-- **Theme** (`src/ui/theme.rs`) — focused/unfocused input, error, success, stat, goal-met and goal-not-met styles. Several screens also set colors inline rather than through the theme.
+- **Theme** (`src/ui/theme.rs`) — every style the UI uses, named by role rather than color: chrome (`active_tab`, `inactive_tab`, `footer_hint`, `esc_menu`, `screen_title`, `help_title`, `heading`, `panel_heading`, `muted`, `error_style`, `success_style`), the Quick Entry form (`focused_input_style`, `unfocused_input_style`, `focused_border`, `unfocused_border`), Run List (`table_header`, `selected_row`, `navigate_key`, `edit_key`, `delete_key`, `switch_key`), and Analytics figures and goal status (`stat_style`, `goal_met_style`, `goal_partial_style`, `goal_not_met_style`, `goal_close_style`, `reminder_style`, `volume_high`, `volume_mid`, `volume_low`). Screens never name a color, so a palette change is made once, in `theme.rs`.
 
 ## Decisions & Alternatives
 
@@ -91,6 +91,7 @@ While the key after Esc is awaited, the footer turns into that menu, so the user
 | Event loop | Single-threaded, 100 ms poll, redraw every iteration | Async runtime; redraw only on events | Simple and responsive enough for a keyboard-driven form. |
 | Testable lifecycle | Side effects passed into `start`, `with_restore`, `install_panic_hook` and `run_app` | Leave lifecycle in `main` untested; integration tests in a pseudo-terminal | Startup order, terminal restore and redraw cadence can be unit-tested without a real terminal, at the cost of a little indirection in `main`. |
 | Key-release events | Ignored | Act on every key event | Windows reports both press and release; acting on releases would double every key. |
+| Styling | Role-named functions in `theme.rs`; screens never name a color | Colors inline in each screen | One place to change the palette, and a style's purpose is readable at the call site. |
 | Failure policy | Screen-level errors are shown on that screen; only quit commands and terminal failures end the app | Exit on any error | A storage problem must not cost the user the rest of the app. |
 | Header keys on Quick Entry | Show the Esc form (`[Esc 1]` …) on Quick Entry, the direct form elsewhere | Same labels everywhere; treat the header as a screen map only | The header is read as key hints; on Quick Entry the direct keys type text, so only the Esc form is true there. |
 | Footer length | Compact hints that fit an 80-column terminal; the Help screen explains in full | Descriptive hints that clip below ~105 columns | A clipped hint is a hidden hint; the footer is a reminder, Help is the reference. |
@@ -99,12 +100,11 @@ While the key after Esc is awaited, the footer turns into that menu, so the user
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **Unused stubs.** `src/ui/components/{chart,input,stats}.rs` contain only comments.
-2. **Inline colors.** Header, Run List and Analytics set colors directly instead of using `theme.rs`.
+None.
 
 ## References
 
-- Code: `src/main.rs`, `src/lifecycle.rs`, `src/input/mod.rs`, `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`, `src/ui/components/*`
+- Code: `src/main.rs`, `src/lifecycle.rs`, `src/input/mod.rs`, `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`
 - Specs: `docs/intent/navigation/navigation-specs.md`
 - Tests: listed in `docs/arrows/navigation.md`
 - Triggers: Storage startup (`STORE-001`), Run List load (`RL-001`), Analytics load (`AN-008`), Quick Entry clear (`QE-007`) and edit cancel (`QE-023`)

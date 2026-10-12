@@ -50,9 +50,7 @@ Local SQLite persistence of the run history — location, schema, stored formats
 ## Key Findings
 
 1. **Missing rows on update/delete** — updating or deleting an id that no longer exists succeeds silently (unreachable from the UI). Not covered by a spec.
-2. **Unused surface** — `get_runs_by_date_range` and `idx_runs_created_at` have no consumers.
 
 ## Work Required
 
-### Nice to Have
-1. Remove or use `get_runs_by_date_range` and `idx_runs_created_at` (the index removal would be the first new migration).
+None.

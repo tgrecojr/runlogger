@@ -1,4 +1,3 @@
-pub mod components;
 pub mod screens;
 /// While Esc waits for its command key, the footer lists the commands.
 // @spec NAV-020
@@ -8,11 +7,7 @@ fn render_esc_menu(f: &mut Frame, area: Rect, current_screen: Screen) {
         menu.push_str("  [Esc] Clear");
     }
     let footer = Paragraph::new(menu)
-        .style(
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
-        )
+        .style(theme::esc_menu())
         .block(Block::default().borders(Borders::ALL));
     f.render_widget(footer, area);
 }
@@ -24,7 +19,6 @@ pub mod theme;
 use crate::app::{App, Screen};
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
     Frame,
@@ -64,11 +58,9 @@ fn render_header(f: &mut Frame, area: Rect, current_screen: Screen) {
         .iter()
         .flat_map(|(key, label, active)| {
             let style = if *active {
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD)
+                theme::active_tab()
             } else {
-                Style::default().fg(Color::Gray)
+                theme::inactive_tab()
             };
 
             vec![
@@ -111,7 +103,7 @@ fn render_footer(f: &mut Frame, area: Rect, current_screen: Screen, waiting_for_
     };
 
     let footer = Paragraph::new(footer_text)
-        .style(Style::default().fg(Color::DarkGray))
+        .style(theme::footer_hint())
         .block(Block::default().borders(Borders::ALL));
 
     f.render_widget(footer, area);

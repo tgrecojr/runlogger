@@ -45,22 +45,6 @@ pub fn get_all_runs(conn: &Connection) -> Result<Vec<Run>> {
     )
 }
 
-#[allow(dead_code)]
-pub fn get_runs_by_date_range(
-    conn: &Connection,
-    start_date: NaiveDate,
-    end_date: NaiveDate,
-) -> Result<Vec<Run>> {
-    query_runs(
-        conn,
-        "SELECT id, date, time_started, distance_miles, note, created_at
-         FROM runs
-         WHERE date >= ?1 AND date <= ?2
-         ORDER BY date DESC, time_started DESC",
-        params![start_date.to_string(), end_date.to_string()],
-    )
-}
-
 /// A uniqueness violation becomes a typed `DuplicateStart` naming the
 /// conflicting date and start time; anything else keeps its SQLite cause.
 // @spec STORE-005

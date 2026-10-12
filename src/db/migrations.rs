@@ -18,6 +18,8 @@ const MIGRATIONS: &[&str] = &[
      );
      CREATE INDEX IF NOT EXISTS idx_runs_date ON runs(date DESC);
      CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at DESC);",
+    // 2: drop an index no query uses.
+    "DROP INDEX IF EXISTS idx_runs_created_at;",
 ];
 
 /// The schema version this app writes and understands.

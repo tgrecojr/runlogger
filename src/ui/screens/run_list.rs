@@ -2,7 +2,7 @@ use crate::app::RunListState;
 use crate::ui::theme;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Modifier, Style},
+    style::Style,
     text::Line,
     widgets::{Block, Borders, Cell, Paragraph, Row, Table, Wrap},
     Frame,
@@ -41,19 +41,15 @@ pub fn render(f: &mut Frame, area: Rect, state: &mut RunListState) {
             .style(Style::default());
         let empty_text = Paragraph::new("No runs logged yet. Press Esc → 1 to add a run.")
             .block(empty_message)
-            .style(Style::default().fg(Color::Gray));
+            .style(theme::muted());
         f.render_widget(empty_text, chunks[0]);
         render_hints(f, chunks[1]);
         return;
     }
 
-    let header_cells = ["Date", "Time", "Distance (mi)", "Note"].iter().map(|h| {
-        Cell::from(*h).style(
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        )
-    });
+    let header_cells = ["Date", "Time", "Distance (mi)", "Note"]
+        .iter()
+        .map(|h| Cell::from(*h).style(theme::table_header()));
     let header = Row::new(header_cells).height(1).bottom_margin(1);
 
     let rows: Vec<Row> = state
@@ -67,9 +63,7 @@ pub fn render(f: &mut Frame, area: Rect, state: &mut RunListState) {
             let note = run.note.as_deref().unwrap_or("");
 
             let style = if i == state.selected_index {
-                Style::default()
-                    .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD)
+                theme::selected_row()
             } else {
                 Style::default()
             };
@@ -108,13 +102,13 @@ pub fn render(f: &mut Frame, area: Rect, state: &mut RunListState) {
 
 fn render_hints(f: &mut Frame, area: Rect) {
     let hints = Paragraph::new(Line::from(vec![
-        ratatui::text::Span::styled("[↑↓] ", Style::default().fg(Color::Yellow)),
+        ratatui::text::Span::styled("[↑↓] ", theme::navigate_key()),
         ratatui::text::Span::raw("Navigate  "),
-        ratatui::text::Span::styled("[e] ", Style::default().fg(Color::Green)),
+        ratatui::text::Span::styled("[e] ", theme::edit_key()),
         ratatui::text::Span::raw("Edit  "),
-        ratatui::text::Span::styled("[d] ", Style::default().fg(Color::Red)),
+        ratatui::text::Span::styled("[d] ", theme::delete_key()),
         ratatui::text::Span::raw("Delete  "),
-        ratatui::text::Span::styled("[Esc→1/2/3] ", Style::default().fg(Color::Cyan)),
+        ratatui::text::Span::styled("[Esc→1/2/3] ", theme::switch_key()),
         ratatui::text::Span::raw("Switch screens"),
     ]))
     .block(Block::default().borders(Borders::ALL).title("Actions"));

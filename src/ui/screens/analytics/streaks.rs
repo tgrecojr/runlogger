@@ -3,7 +3,7 @@ use crate::models::analytics::YEAR_GOAL_DAYS;
 use crate::ui::theme;
 use ratatui::{
     layout::Rect,
-    style::{Color, Modifier, Style},
+    style::Style,
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
     Frame,
@@ -18,17 +18,11 @@ pub(super) fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     };
 
     let days_remaining_style = if state.analytics.days_remaining_to_year_goal <= 0 {
-        Style::default()
-            .fg(Color::Green)
-            .add_modifier(Modifier::BOLD)
+        theme::goal_met_style()
     } else if state.analytics.days_remaining_to_year_goal < 100 {
-        Style::default()
-            .fg(Color::Yellow)
-            .add_modifier(Modifier::BOLD)
+        theme::goal_close_style()
     } else {
-        Style::default()
-            .fg(Color::White)
-            .add_modifier(Modifier::BOLD)
+        theme::stat_style()
     };
 
     let days_remaining_text = if state.analytics.days_remaining_to_year_goal <= 0 {
@@ -44,18 +38,16 @@ pub(super) fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     let text = vec![
         current_streak_line(state, streak_style),
         Line::from(vec![
-            Span::styled("Longest Streak: ", Style::default().fg(Color::Cyan)),
+            Span::styled("Longest Streak: ", theme::heading()),
             Span::styled(
                 format!("{} days", state.analytics.longest_streak),
-                Style::default()
-                    .fg(Color::White)
-                    .add_modifier(Modifier::BOLD),
+                theme::stat_style(),
             ),
         ]),
         Line::from(vec![
             Span::styled(
                 format!("Year Goal ({YEAR_GOAL_DAYS} days @ 1mi): "),
-                Style::default().fg(Color::Cyan),
+                theme::heading(),
             ),
             Span::styled(days_remaining_text, days_remaining_style),
         ]),
@@ -71,13 +63,13 @@ pub(super) fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
 fn current_streak_line(state: &AnalyticsState, streak_style: Style) -> Line<'static> {
     let analytics = &state.analytics;
     let mut spans = vec![
-        Span::styled("Current Streak: ", Style::default().fg(Color::Cyan)),
+        Span::styled("Current Streak: ", theme::heading()),
         Span::styled(format!("{} days", analytics.current_streak), streak_style),
     ];
     if analytics.current_streak > 0 && !analytics.today_goal_met {
         spans.push(Span::styled(
             " (run today to extend)",
-            Style::default().fg(Color::Yellow),
+            theme::reminder_style(),
         ));
     }
     Line::from(spans)

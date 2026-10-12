@@ -42,7 +42,7 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 3. `handle_key_event` (`src/input/mod.rs`) — quit keys, Esc prefix (`handle_esc_command`), direct keys (`handle_direct_keys`), hand-off to screen handlers; never fails on storage errors
 4. `ui/mod.rs` — header tabs (Esc form on Quick Entry) and per-screen footer that fits 80 columns
 5. `screens/help.rs` — static Help screen
-6. `theme.rs` — shared styles
+6. `theme.rs` — every style, named by role
 
 ## Spec Coverage
 
@@ -64,4 +64,4 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 ## Work Required
 
 ### Nice to Have
-1. Decide whether Alt/Ctrl combinations other than Ctrl+Q/Ctrl+C should be ignored; delete `ui/components` stubs; route inline colors through `theme.rs`.
+1. Decide whether Alt/Ctrl combinations other than Ctrl+Q/Ctrl+C should be ignored.
