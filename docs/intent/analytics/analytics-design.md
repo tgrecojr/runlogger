@@ -34,9 +34,9 @@ Runs are summed per local calendar date, so several short runs on one day combin
 | Measure | Window | Definition |
 |---|---|---|
 | Totals | All counted runs | Run count, total miles, average miles per run |
-| Week | Today and the 6 days before | Run count, average miles per run |
-| Month | Today and the 29 days before | Run count, average miles per run |
-| Year | Jan 1 of the current year through today | Run count, average miles per run |
+| Last 7 Days | Today and the 6 days before | Run count, average miles per run |
+| Last 30 Days | Today and the 29 days before | Run count, average miles per run |
+| This Year | Jan 1 of the current year through today | Run count, average miles per run |
 | Recent trend | The 14 dates ending today | Daily total per date, 0 for dates with no run |
 | Monthly breakdown | 12 most recent calendar months *that have runs* | Total miles, run count, average per run, newest first |
 
@@ -44,7 +44,7 @@ Averages are per run, not per day, and are 0 when a window has no runs. With no 
 
 ## Screen
 
-`load_analytics` reads the full history and stores the result in `AnalyticsState` when Navigation opens the screen (`3`, Esc→`3`). If the read fails, the Analytics screen shows a single bordered panel in bold red — `Could not load analytics: <reason>` — in place of all panels, and the app keeps running (`AN-014`). The reason includes its full cause chain on one line. `AnalyticsState` holds the message in `error_message`; the next successful load clears it. No figures are shown from a failed read, since they would describe a history that could not be read.
+`load_analytics` reads the full history and stores the result in `AnalyticsState` — with the date it was computed for — when Navigation opens the screen (`3`, Esc→`3`). While the screen stays open, the event loop compares that date with today before each frame and recomputes when the day changes, so streaks and "today" stay current past midnight (`AN-008`). The statistics row's panels are titled **Totals**, **Last 7 Days** and **Last 30 Days / Year**, each row reading `Runs: N` / `Avg: X.XX mi` (with "Last 30 Days" / "This Year" sub-labels in the third panel), so the rolling windows are not mistaken for calendar periods (`AN-010`). If the read fails, the Analytics screen shows a single bordered panel in bold red — `Could not load analytics: <reason>` — in place of all panels, and the app keeps running (`AN-014`). The reason includes its full cause chain on one line. `AnalyticsState` holds the message in `error_message`; the next successful load clears it. No figures are shown from a failed read, since they would describe a history that could not be read.
 
 The screen (`src/ui/screens/analytics/`, 1-cell margin) stacks three rows: Streaks (6 rows), the three statistics panels side by side (8 rows), and a bottom row taking the remaining height in which **Last 14 Days** and **Mileage by Month** sit side by side: Mileage by Month at a fixed 46 columns (wide enough for its header line, "Monthly Totals (Green ≥50 mi, Yellow ≥25 mi)", plus borders) and the chart taking the remaining width. Placing the chart beside the monthly panel keeps both visible on short terminals; on narrow terminals the longest bars are clipped at the chart panel's edge.
 
@@ -96,8 +96,7 @@ The module is split by panel so each file stays within the project's 300-line li
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **Stale "today".** Analytics are computed when the screen opens; leaving it open past midnight shows yesterday's view until reopened.
-2. **Labels.** "This Week"/"This Month" read as calendar periods but are rolling 7/30 days; the Week panel's average is labeled "Avg Distance" while the Period panel uses "Avg".
+None.
 
 ## References
 

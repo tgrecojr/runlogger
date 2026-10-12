@@ -46,13 +46,13 @@ fn invalid_submission_shows_message_and_keeps_fields() {
             "2020/01/01",
             "07:00",
             "3",
-            "Invalid date format. Use YYYY-MM-DD",
+            "Invalid date. Use YYYY-MM-DD, MM/DD/YYYY or MM-DD-YYYY",
         ),
         (
             "2020-01-01",
             "7pm",
             "3",
-            "Invalid time format. Use HH:MM or HH:MM:SS",
+            "Invalid time. Use HH:MM, HH:MM:SS or h:MM AM/PM",
         ),
         ("2020-01-01", "07:00", "", "Distance is required"),
         ("2020-01-01", "07:00", "0", "Distance must be positive"),
@@ -189,4 +189,18 @@ fn other_save_failures_give_the_cause_and_keep_the_edit() {
     );
     assert!(state.is_editing());
     assert_eq!(app.screen, Screen::QuickEntry);
+}
+
+// @spec QE-016
+#[test]
+fn saved_date_is_shown_in_iso_form() {
+    let conn = memory_db();
+    let mut app = App::new();
+    fill(&mut app, "10/01/2026", "07:00:00", "3", "");
+    press(&mut app, &conn, &[key(KeyCode::Enter)]);
+    assert_eq!(
+        app.quick_entry_state.success_message.as_deref(),
+        Some("Run logged successfully!")
+    );
+    assert_eq!(app.quick_entry_state.date, "2026-10-01");
 }

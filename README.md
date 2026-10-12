@@ -35,6 +35,7 @@ cargo build --release
 
 - **[Esc] → [1] / [2] / [3]**: Quick Entry / Run List / Analytics — works on every screen
 - **[Esc] → [h] or [?]**: Help screen — works on every screen
+- While Esc is waiting for its next key, the footer shows the available commands
 - **[1-3], [h], [?]**: The same, directly — on every screen except Quick Entry, where keys type into the form
 - **[q]**: Quit (except in Quick Entry)
 - **[Ctrl+Q] or [Ctrl+C]**: Quit from anywhere
@@ -47,6 +48,7 @@ The header shows the key for each screen: on Quick Entry it shows the Esc form (
 - **Enter**: Save the run (or the changes, when editing)
 - **Esc → Esc**: Clear the form (this also cancels an edit)
 - Date and time are pre-filled; just enter a distance and optionally a note
+- Dates can be typed as YYYY-MM-DD or MM/DD/YYYY; times as HH:MM or 7:15 AM
 - Date keeps up with today (even past midnight) until you change it
 - After each save, Time resets to the current time, so the next run gets its own start time
 - Runs cannot be dated or timed in the future
@@ -56,6 +58,7 @@ The header shows the key for each screen: on Quick Entry it shows the Esc form (
 - **Up/Down Arrows**: Select a run (the list scrolls to keep the selection visible)
 - **[e]**: Edit the selected run in the Quick Entry form
 - **[d]**: Delete the selected run (immediate, no confirmation); the selection stays at the same row
+- **[2]** while on Run List refreshes it and keeps your selection
 - After saving an edit you return to Run List with the edited run selected
 - Leaving an edit for Run List or Analytics cancels it; a quick look at Help keeps it
 
@@ -65,7 +68,7 @@ The header shows the key for each screen: on Quick Entry it shows the Esc form (
 - **Longest Streak**: Your personal best streak
 - **Year Goal**: Days remaining to 365 goal days this year, with completion percentage
 - **Totals**: Total runs, distance, and average per run
-- **Period Stats**: Runs and average distance for the last 7 days, the last 30 days, and this year
+- **Last 7 Days / Last 30 Days / This Year**: Runs and average distance for each window
 - **Last 14 Days**: Daily mileage, color-coded:
   - **Green**: Goal met (1.00 mi or more)
   - **Yellow**: Partial run (under 1.00 mi)
@@ -74,7 +77,7 @@ The header shows the key for each screen: on Quick Entry it shows the Esc form (
 
 ## Data Storage
 
-Your runs are stored in an SQLite database in your platform's data directory — on macOS:
+Your runs are stored in an SQLite database in your platform's data directory (the Help screen shows the exact path) — on macOS:
 ```
 ~/Library/Application Support/runlogger/runs.db
 ```

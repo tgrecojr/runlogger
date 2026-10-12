@@ -38,14 +38,14 @@ pub fn render(f: &mut Frame, area: Rect, state: &QuickEntryState) {
     render_input_field(
         f,
         chunks[1],
-        "Date (YYYY-MM-DD)",
+        "Date (YYYY-MM-DD or MM/DD/YYYY)",
         &state.date,
         state.focused_field == InputField::Date,
     );
     render_input_field(
         f,
         chunks[2],
-        "Time (HH:MM:SS)",
+        "Time (HH:MM or h:MM AM/PM)",
         &state.time,
         state.focused_field == InputField::Time,
     );

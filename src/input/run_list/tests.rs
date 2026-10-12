@@ -71,15 +71,16 @@ fn pressing_2_loads_full_history_newest_first_and_selects_newest() {
 
 // @spec RL-001
 #[test]
-fn esc_then_2_reloads_history_and_resets_selection_to_newest() {
+fn esc_then_2_from_another_screen_reloads_history_and_selects_newest() {
     let conn = memory_db();
     let mut expected = unordered_history(&conn);
     let mut app = App::new();
     press(&mut app, &conn, &[key(KeyCode::Esc), ch('2')]);
     assert_eq!(listed_ids(&app), expected);
 
-    // Move off the newest run, add a newer one elsewhere, then reopen.
+    // Move off the newest run, leave for Analytics, add a newer run, reopen.
     press(&mut app, &conn, &[key(KeyCode::Down), key(KeyCode::Down)]);
+    press(&mut app, &conn, &[key(KeyCode::Esc), ch('3')]);
     let newer = insert_raw(&conn, "2026-10-03", "07:00:00", 1.5);
     expected.insert(0, Some(newer));
     press(&mut app, &conn, &[key(KeyCode::Esc), ch('2')]);
@@ -194,4 +195,45 @@ fn d_does_nothing_when_the_list_is_empty() {
     assert_eq!(stored_ids(&conn), vec![hidden]);
     assert!(app.run_list_state.runs.is_empty());
     assert_eq!(app.run_list_state.error_message, None);
+}
+
+// @spec RL-014
+#[test]
+fn pressing_2_on_run_list_keeps_the_selected_run() {
+    let conn = memory_db();
+    insert_raw(&conn, "2026-10-03", "07:00:00", 3.0);
+    let middle = insert_raw(&conn, "2026-10-02", "07:00:00", 2.0);
+    insert_raw(&conn, "2026-10-01", "07:00:00", 1.0);
+    let mut app = App::new();
+    press(
+        &mut app,
+        &conn,
+        &[key(KeyCode::Esc), ch('2'), key(KeyCode::Down)],
+    );
+    insert_raw(&conn, "2026-10-04", "07:00:00", 4.0); // a newer run appears above it
+    for keys in [vec![ch('2')], vec![key(KeyCode::Esc), ch('2')]] {
+        press(&mut app, &conn, &keys);
+        let state = &app.run_list_state;
+        assert_eq!(state.runs.len(), 4);
+        assert_eq!(state.runs[state.selected_index].id, Some(middle));
+    }
+}
+
+// @spec RL-014
+#[test]
+fn pressing_2_selects_newest_when_the_selected_run_is_gone() {
+    let conn = memory_db();
+    let newest = insert_raw(&conn, "2026-10-03", "07:00:00", 3.0);
+    let doomed = insert_raw(&conn, "2026-10-02", "07:00:00", 2.0);
+    let mut app = App::new();
+    press(
+        &mut app,
+        &conn,
+        &[key(KeyCode::Esc), ch('2'), key(KeyCode::Down)],
+    );
+    conn.execute("DELETE FROM runs WHERE id = ?1", [doomed])
+        .unwrap();
+    press(&mut app, &conn, &[ch('2')]);
+    let state = &app.run_list_state;
+    assert_eq!(state.runs[state.selected_index].id, Some(newest));
 }

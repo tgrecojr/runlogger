@@ -151,19 +151,37 @@ fn totals_week_and_period_panels_show_counts_and_two_decimal_distances() {
     ] {
         assert_in_panel(&buf, "Totals", needle);
     }
-    for needle in ["This Week: 5 runs", "Avg Distance: 1.23 mi"] {
-        assert_in_panel(&buf, "Week", needle);
+    for needle in ["Runs: 5", "Avg: 1.23 mi"] {
+        assert_in_panel(&buf, "Last 7 Days", needle);
     }
     for needle in [
-        "This Month: 12 runs",
+        "Runs: 12",
         "Avg: 3.00 mi",
-        "This Year: 101 runs",
+        "This Year",
+        "Runs: 101",
         "Avg: 4.57 mi",
     ] {
-        assert_in_panel(&buf, "Period", needle);
+        assert_in_panel(&buf, "Last 30 Days / Year", needle);
     }
-    // Last 30 days come before the current year in the Period panel.
-    assert!(locate(&buf, "This Month: ").1 < locate(&buf, "This Year: ").1);
+    // "Last 30 Days" and "This Year" head their figures, in that order.
+    let (_, title_y) = locate(&buf, "Last 30 Days / Year");
+    let screen = buffer_text(&buf);
+    let heading_row = |name: &str| {
+        screen
+            .lines()
+            .enumerate()
+            .skip(title_y as usize + 1)
+            .find(|(_, l)| l.contains(name))
+            .map(|(y, _)| y)
+            .unwrap()
+    };
+    assert!(heading_row("Last 30 Days") < locate(&buf, "Runs: 12").1 as usize);
+    assert!(heading_row("This Year") < locate(&buf, "Runs: 101").1 as usize);
+    // The last 30 days come before the current year in the third panel.
+    assert!(locate(&buf, "Runs: 12").1 < locate(&buf, "Runs: 101").1);
+    for old in ["This Week", "This Month", "Avg Distance"] {
+        assert!(!buffer_text(&buf).contains(old), "{old:?} still shown");
+    }
 }
 
 /// A run date `days` from the real local today, as stored in the database.

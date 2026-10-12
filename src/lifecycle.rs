@@ -90,7 +90,9 @@ where
     B::Error: Send + Sync + 'static,
 {
     loop {
-        app.tick(Local::now().date_naive());
+        let today = Local::now().date_naive();
+        app.tick(today);
+        input::refresh_analytics_if_stale(app, conn, today);
         terminal.draw(|f| ui::render(f, app))?;
 
         if let Some(Event::Key(key)) = events.next_event(IDLE_REDRAW)? {

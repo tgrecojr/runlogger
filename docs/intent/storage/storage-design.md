@@ -43,7 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_runs_date ON runs(date DESC);
 CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at DESC);
 ```
 
-There is no schema-version table; the `IF NOT EXISTS` form is the only migration mechanism.
+**Schema versioning (`STORE-016`, `STORE-017`).** The schema version lives in SQLite's `user_version`. `MIGRATIONS` is an ordered list of SQL batches; migration *n* brings a database to version *n*. Migration 1 is the DDL above — written with `IF NOT EXISTS`, so databases created before versioning (version 0, tables already present) pass through it unchanged. On startup `init_database` reads `user_version`, runs each newer migration inside a transaction that also sets `user_version` to that migration's number, and leaves a current database untouched. A recorded version higher than `MIGRATIONS.len()` means a newer app wrote the file; startup fails with `StorageError::NewerSchema` ("This database was written by a newer version of Run Logger (schema N; this version supports M)") rather than risk misreading it. The next schema change is a new entry appended to `MIGRATIONS`.
 
 After the DDL, `repair_start_times` repairs start times written with fractional seconds by earlier versions:
 
@@ -83,6 +83,8 @@ All in `src/db/queries.rs`; every function takes `&Connection` and returns `anyh
 
 A history read is all-or-nothing: if any row's date, start time or `created_at` cannot be parsed, the whole read fails with an error naming the run's id, the field and the stored value — for example `Run 12 has an unreadable date: "2026-13-45"`. The value is shown quoted with Rust debug escaping, so newlines or control characters in a hand-edited database cannot disturb the screen. No partial history is returned, so no screen ever shows figures computed from an incomplete history; the screen that asked shows the error instead and the app keeps running (`NAV-017`).
 
+Distance is read as a raw SQLite value: a real or integer is accepted; anything else (text, blob, NULL) fails the read the same way as an unreadable date, as `Run N has an unreadable distance: <value>`.
+
 Row decoding is shared by every read: `query_runs` fetches rows as raw column values (`StoredRun`) and `to_run` converts each to a `Run`, outside the SQLite row callback, so conversion errors carry ordinary `anyhow` context.
 
 A uniqueness violation on insert or update is reported as a typed `StorageError::DuplicateStart { date, time }` (a `thiserror` enum inside the `anyhow` error), recognized from SQLite's extended result code `SQLITE_CONSTRAINT_UNIQUE`, so callers can tell the user exactly which run conflicts (`STORE-005`). Other SQLite errors surface as `anyhow` errors with context ("Failed to insert run", "Failed to update run", "Failed to delete run").
@@ -95,7 +97,7 @@ A uniqueness violation on insert or update is reported as a typed `StorageError:
 | Database location | `dirs::data_dir()/runlogger/runs.db` | Working directory; config flag; XDG override | Platform-conventional per-user data location; app works from any directory with no setup. |
 | Date/time representation | Separate naive-local `date` and `time_started` TEXT columns | Single UTC timestamp; Unix epoch integer | The local calendar day is the unit of the daily goal, so the date is stored directly rather than derived from a zone-dependent instant; ISO text sorts correctly. |
 | Duplicate protection | `UNIQUE(date, time_started)`, reported as a typed `DuplicateStart` error | No constraint; dedupe in app; callers match SQLite's message text | Guards against double-submitting the same entry; a typed error lets the UI explain the conflict without depending on SQLite's wording. |
-| Schema evolution | `CREATE ... IF NOT EXISTS` on every launch | Versioned migrations (`user_version` pragma, migration crate) | Only one schema version has ever existed. |
+| Schema evolution | Ordered migrations recorded in `user_version`; refuse a newer schema | `IF NOT EXISTS` DDL only; a migration crate | Gives the next schema change a safe path for existing databases without a dependency; refusing a newer schema protects data written by a newer app. |
 | Read strategy | Load the entire table on each screen switch | Date-range queries; SQL aggregation for analytics | Data volume is tiny; in-memory computation keeps analytics logic in Rust and testable without SQL. |
 | Connection lifetime | One connection for the process, passed by reference | Open per operation; pool | Single-threaded event loop, single user. |
 | Start times written before whole-second storage | Tolerant read plus a startup repair that rewrites `HH:MM:SS.<digits>` values to whole seconds | Tolerant read only; repair only; repair anything longer than 8 characters | The repair brings stored data to the one canonical format; the tolerant read covers rows the repair must skip to avoid duplicates and any database the repair has not yet run on. |
@@ -105,9 +107,7 @@ A uniqueness violation on insert or update is reported as a typed `StorageError:
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **No schema versioning.** The next schema change has no path to migrate existing user databases.
-2. **Unused surface.** `get_runs_by_date_range` is dead code; `idx_runs_created_at` serves no query; `open_connection` is public but only called by `init_db`. Keep, remove, or put to use?
-3. **Uniqueness also blocks edits.** Moving a run onto the exact date and start time of another run fails the update with "Failed to update run" rather than a specific message. Intended?
+1. **Unused surface.** `get_runs_by_date_range` is dead code; `idx_runs_created_at` serves no query; `open_connection` is public but only called by `init_db`. Keep, remove, or put to use?
 
 ## References
 

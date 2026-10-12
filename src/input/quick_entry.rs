@@ -63,6 +63,7 @@ fn submit(app: &mut App, conn: &Connection) {
         None => match db::queries::insert_run(conn, &run) {
             Ok(_) => {
                 // A fresh start time keeps the next run from duplicating this one.
+                state.date = format_date(&run.date);
                 state.time = format_time(&current_time());
                 state.distance.clear();
                 state.note.clear();
@@ -83,7 +84,7 @@ fn save_error_message(e: &anyhow::Error) -> String {
             format_date(date),
             format_time(time)
         ),
-        None => format!(
+        _ => format!(
             "Could not save run: {e:#}. Your entry is still here — press Enter to try again."
         ),
     }

@@ -48,3 +48,22 @@ fn full_history_is_ordered_by_date_then_start_time_descending() {
     let e = insert_run(&conn, &run_on((2025, 12, 31), (23, 0, 0), 1.0, None)).unwrap();
     assert_eq!(history_ids(&conn), vec![d, b, a, c, e]);
 }
+
+// @spec STORE-015
+#[test]
+fn unreadable_distance_fails_the_read_naming_the_run() {
+    let conn = memory_db();
+    conn.execute(
+        "INSERT INTO runs (date, time_started, distance_miles, note, created_at)
+         VALUES ('2026-10-01', '07:00:00', 'abc', NULL, '2026-01-01T00:00:00+00:00')",
+        [],
+    )
+    .unwrap();
+    let id = conn.last_insert_rowid();
+    let err = format!("{:#}", get_all_runs(&conn).unwrap_err());
+    assert!(
+        err.contains(&format!("Run {id} has an unreadable distance")),
+        "{err}"
+    );
+    assert!(err.contains("\"abc\""), "{err}");
+}

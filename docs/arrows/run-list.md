@@ -4,7 +4,7 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then RL-002, RL-012 and RL-013 were changed and tested. All 13 specs implemented and tested.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then error wrapping, the singular title and keeping the selection on `2` (RL-014) landed with tests. All 14 specs implemented and tested.
 
 ## References
 
@@ -15,10 +15,10 @@ The history view: full run list newest first, selection, edit hand-off and immed
 - docs/intent/run-list/run-list-design.md
 
 ### EARS
-- docs/intent/run-list/run-list-specs.md (13 specs)
+- docs/intent/run-list/run-list-specs.md (14 specs)
 
 ### Tests
-- src/input/run_list/tests.rs (RL-001, RL-006, RL-008, RL-009)
+- src/input/run_list/tests.rs (RL-001, RL-006, RL-008, RL-009, RL-014)
 - src/input/tests/edits.rs (RL-010, RL-011)
 - src/input/tests/errors.rs (RL-012, RL-013)
 - src/ui/screens/run_list/tests.rs (RL-002, RL-003, RL-005, RL-012, RL-013)
@@ -26,7 +26,7 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 ### Code
 - src/app.rs (RL-011)
-- src/input/mod.rs (RL-001, RL-012)
+- src/input/mod.rs (RL-001, RL-012, RL-014)
 - src/input/run_list.rs (RL-006, RL-008, RL-009, RL-010, RL-013)
 - src/ui/screens/run_list.rs (RL-002, RL-003, RL-004, RL-005, RL-007, RL-012, RL-013)
 
@@ -44,19 +44,18 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 | Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
 |----------|----------|-------------|----------|------|--------|
-| Loading | RL-001 | 1 | 0 | 0 | 1 |
+| Loading | RL-001, RL-014 | 2 | 0 | 0 | 2 |
 | Display | RL-002, RL-003, RL-004, RL-005 | 4 | 0 | 0 | 4 |
 | Selection | RL-006, RL-007 | 2 | 0 | 0 | 2 |
 | Edit and Delete | RL-008, RL-009, RL-010, RL-011 | 4 | 0 | 0 | 4 |
 | Errors | RL-012, RL-013 | 2 | 0 | 0 | 2 |
 
-**Summary:** 13 of 13 specs marked implemented; 13 of 13 cited by a test. Untested: none.
+**Summary:** 14 of 14 specs marked implemented; 14 of 14 cited by a test. Untested: none.
 
 ## Key Findings
 
-1. **Reload on re-open** — pressing `2` while on Run List reloads and moves the selection to the top.
+None outstanding.
 
 ## Work Required
 
-### Nice to Have
-1. Keep the selection when `2` is pressed on Run List.
+None.

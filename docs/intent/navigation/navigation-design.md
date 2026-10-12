@@ -70,8 +70,11 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 | Run List | `[↑↓] Navigate  [e] Edit  [d] Delete  [1-3] Screen  [h] Help  [q] Quit` |
 | Analytics | `[1-3] Screen  [h] Help  [q] Quit` |
 | Help | `[1-3] Screen  [q] Quit` |
+| *any screen, after Esc* | `Esc → [1] Quick Entry  [2] Run List  [3] Analytics  [h] Help` in bold cyan, plus `  [Esc] Clear` on Quick Entry (`NAV-020`) |
 
-- **Help screen** (`src/ui/screens/help.rs`) — static reference in sections: Navigation (Esc commands work everywhere; direct `1`–`3`, `h`, `?`, `q` everywhere except Quick Entry, where keys type text), Quick Entry (fields, save, clear, Time refreshing after a save, no future runs, leaving mid-edit cancels the edit), Run List (select, edit, delete without confirmation), Your Goal (a mile a day, runs on one day add up, today counts once its mile is logged), and Data Location.
+While the key after Esc is awaited, the footer turns into that menu, so the user can see that the next key is a command and what it can do; the next key restores the normal footer.
+
+- **Help screen** (`src/ui/screens/help.rs`) — static reference in sections: Navigation (Esc commands work everywhere; direct `1`–`3`, `h`, `?`, `q` everywhere except Quick Entry, where keys type text), Quick Entry (fields, save, clear, Time refreshing after a save, no future runs, leaving mid-edit cancels the edit), Run List (select, edit, delete without confirmation), Your Goal (a mile a day, runs on one day add up, today counts once its mile is logged), and Data Location — the full path of the database actually in use, which `main` stores on `App` as `db_location` after opening it (`NAV-015`).
 - **Theme** (`src/ui/theme.rs`) — focused/unfocused input, error, success, stat, goal-met and goal-not-met styles. Several screens also set colors inline rather than through the theme.
 
 ## Decisions & Alternatives
@@ -96,10 +99,8 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **No Esc-prefix indicator.** After Esc nothing on screen shows that the next key is a command.
-2. **Hard-coded data path in Help.** Shows the macOS path even where `dirs::data_dir()` differs.
-3. **Unused stubs.** `src/ui/components/{chart,input,stats}.rs` contain only comments.
-4. **Inline colors.** Header, Run List and Analytics set colors directly instead of using `theme.rs`.
+1. **Unused stubs.** `src/ui/components/{chart,input,stats}.rs` contain only comments.
+2. **Inline colors.** Header, Run List and Analytics set colors directly instead of using `theme.rs`.
 
 ## References
 

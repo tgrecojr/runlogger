@@ -6,7 +6,8 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 
 ## Loading
 
-- [x] **RL-001**: When the user opens the Run List screen with `2` or Esc → `2`, the system shall load the full run history from storage, newest first by date and then start time, and select the first (newest) run.
+- [x] **RL-001**: When the user opens the Run List screen from another screen with `2` or Esc → `2`, the system shall load the full run history from storage, newest first by date and then start time, and select the first (newest) run.
+- [x] **RL-014**: When the user presses `2` or Esc → `2` while the Run List screen is already shown, the system shall reload the run history and keep the same run selected, or select the newest run if that run no longer exists.
 
 ## Display
 

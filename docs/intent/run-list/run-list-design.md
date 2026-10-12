@@ -17,6 +17,8 @@ Code: `RunListState` in `src/app.rs`, `handle_run_list_input` in `src/input/run_
 
 `RunListState` holds `runs: Vec<Run>`, `selected_index`, `table_state` (ratatui's `TableState`, which carries the scroll position between frames) and `error_message: Option<String>`. `select_run(id)` selects the run with that id if it is in the list; Quick Entry uses it after an edit (`RL-011`).
 
+Opening Run List from another screen selects the newest run (`RL-001`). Pressing `2` (or Esc→`2`) while already on Run List reloads but keeps the same run selected, found by id, falling back to the newest if it is gone (`RL-014`), so a refresh never loses the user's place.
+
 `load_runs` replaces `runs` with `get_all_runs` (newest first by date, then start time — `STORE-012`) and resets `selected_index` to 0 and `table_state` to its default. It runs every time the screen is opened (Navigation calls it on `2` and Esc→`2`), after a delete, and after a Quick Entry edit is saved — in which case Quick Entry then calls `select_run` for the edited run. There is no cache: the list always reflects the database at open time.
 
 Storage failures stay on this screen and never end the app:

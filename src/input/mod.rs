@@ -1,5 +1,6 @@
 use crate::app::{App, Screen};
 use crate::{db, logic};
+use chrono::NaiveDate;
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::widgets::TableState;
 use rusqlite::Connection;
@@ -80,8 +81,18 @@ fn screen_for_key(code: KeyCode) -> Option<Screen> {
 }
 
 /// Switches screens, loading Run List or Analytics data first.
+// @spec RL-014
 fn open_screen(app: &mut App, screen: Screen, conn: &Connection) {
     match screen {
+        // Refreshing Run List from Run List keeps the user's place.
+        Screen::RunList if app.screen == Screen::RunList => {
+            let state = &app.run_list_state;
+            let selected = state.runs.get(state.selected_index).and_then(|r| r.id);
+            load_runs(app, conn);
+            if let Some(id) = selected {
+                app.run_list_state.select_run(id);
+            }
+        }
         Screen::RunList => load_runs(app, conn),
         Screen::Analytics => load_analytics(app, conn),
         Screen::QuickEntry | Screen::Help => {}
@@ -108,13 +119,26 @@ pub(super) fn load_runs(app: &mut App, conn: &Connection) {
     }
 }
 
-// @spec AN-008, AN-014
+/// Recomputes Analytics when the date has changed since they were computed.
+// @spec AN-008
+pub fn refresh_analytics_if_stale(app: &mut App, conn: &Connection, today: NaiveDate) {
+    if app.screen == Screen::Analytics && app.analytics_state.computed_for != Some(today) {
+        load_analytics_for(app, conn, today);
+    }
+}
+
 pub(super) fn load_analytics(app: &mut App, conn: &Connection) {
+    load_analytics_for(app, conn, chrono::Local::now().date_naive());
+}
+
+/// Computes Analytics as of `today`. A failed read shows on Analytics instead.
+// @spec AN-008, AN-014
+pub(super) fn load_analytics_for(app: &mut App, conn: &Connection, today: NaiveDate) {
     let state = &mut app.analytics_state;
+    state.computed_for = Some(today);
     match db::queries::get_all_runs(conn) {
         Ok(runs) => {
-            state.analytics =
-                logic::streak::calculate_analytics(&runs, chrono::Local::now().date_naive());
+            state.analytics = logic::streak::calculate_analytics(&runs, today);
             state.error_message = None;
         }
         Err(e) => {

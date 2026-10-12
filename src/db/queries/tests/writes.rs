@@ -11,7 +11,7 @@ fn assert_duplicate(
             assert_eq!(*date, NaiveDate::from_ymd_opt(y, m, d).unwrap());
             assert_eq!(*time, NaiveTime::from_hms_opt(h, min, sec).unwrap());
         }
-        None => panic!("not a DuplicateStart error: {err:#}"),
+        _ => panic!("not a DuplicateStart error: {err:#}"),
     }
 }
 
