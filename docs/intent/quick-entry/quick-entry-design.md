@@ -43,11 +43,11 @@ On Enter, both messages are cleared, then fields are parsed in order Date → Ti
 |---|---|---|---|
 | Date (`parse_date`) | `%Y-%m-%d`, `%m/%d/%Y`, `%m-%d-%Y` | today | "Invalid date format. Use YYYY-MM-DD" |
 | Time (`parse_time`) | `%H:%M:%S`, `%H:%M`, `%I:%M %p`, `%I:%M:%S %p` | current clock time, truncated to whole seconds | "Invalid time format. Use HH:MM or HH:MM:SS" |
-| Distance (`parse_distance`) | anything `f64::from_str` accepts after trimming | error | "Distance is required" / "Invalid distance. Enter a number (e.g., 3.5)" |
+| Distance (`parse_distance`) | a finite number after trimming (`NaN` and `inf` are rejected) | error | "Distance is required" / "Invalid distance. Enter a number (e.g., 3.5)" |
 
 Once Date and Time have parsed, and before Distance is checked, the submission's date and time together must not be after the current local date and time (`QE-024`): a date after today is rejected with "Date cannot be in the future", and today's date with a later time with "Time cannot be in the future". Runs record what has happened; a future run would distort the streak and period statistics. The check is a pure function of the submission and the current date-time (`check_not_future` in `validation.rs`), so it can be tested at any fixed "now".
 
-`Run::new` then enforces the run rules: distance must be `> 0` ("Distance must be positive") and `≤ 200` ("Distance seems unrealistic (>200 miles)"). It stamps `created_at = Utc::now()`. An empty Note becomes `None`.
+`Run::new` then enforces the run rules: distance must be finite ("Invalid distance. Enter a number (e.g., 3.5)"), `> 0` ("Distance must be positive") and `≤ 200` ("Distance seems unrealistic (>200 miles)"). It stamps `created_at = Utc::now()`. An empty Note becomes `None`.
 
 ## Submit Flow
 
@@ -114,10 +114,9 @@ Run logged successfully!              ← red error takes precedence over green 
 
 ### Deferred
 1. **Date prefill across midnight.** The Date field is captured at startup and on clear, so with the app left open past midnight a new run is logged to the previous day unless the user edits Date. Should Date also refresh after an insert or when the screen is shown?
-2. **Non-finite distances.** `"NaN"` passes both `parse_distance` and `Run::new` because NaN comparisons are false; whether SQLite's `NOT NULL` then rejects it is unverified. `"inf"` is rejected only incidentally by the 200-mile check.
-3. **Whitespace-only Distance** passes the empty check (which runs before trimming) and reports "Invalid distance…" instead of "Distance is required".
-4. **Modifier keys** other than Ctrl+Q/Ctrl+C insert their base character into the field.
-5. **Labels and error text undersell accepted formats** — "Time (HH:MM:SS)" and the error messages omit HH:MM, AM/PM and the US date forms.
+2. **Whitespace-only Distance** passes the empty check (which runs before trimming) and reports "Invalid distance…" instead of "Distance is required".
+3. **Modifier keys** other than Ctrl+Q/Ctrl+C insert their base character into the field.
+4. **Labels and error text undersell accepted formats** — "Time (HH:MM:SS)" and the error messages omit HH:MM, AM/PM and the US date forms.
 
 ## References
 

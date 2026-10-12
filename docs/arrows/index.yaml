@@ -12,7 +12,7 @@ taxonomy:
 
 arrows:
   storage:
-    status: PARTIAL
+    status: AUDITED
     parent: null
     sampled: 2026-10-12
     audited: 2026-10-12
@@ -20,11 +20,11 @@ arrows:
     blocks: [quick-entry, run-list, analytics, navigation]
     blockedBy: []
     detail: storage.md
-    next: "Fix STORE-014 repair scope; add tests for untested STORE specs"
-    drift: "STORE-014: repair truncates any time_started longer than 8 characters, not only fractional-second values"
+    next: "Add tests for untested STORE specs; decide unreadable-distance error"
+    drift: null
 
   quick-entry:
-    status: PARTIAL
+    status: AUDITED
     parent: null
     sampled: 2026-10-12
     audited: 2026-10-12
@@ -32,8 +32,8 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: quick-entry.md
-    next: "Reject NaN distances (QE-012, QE-013); decide QE-020 cause text; add tests"
-    drift: "QE-012/QE-013: \"NaN\" passes distance validation and fails later as a database error"
+    next: "Decide QE-020 cause text; add tests for untested QE specs"
+    drift: null
 
   run-list:
     status: AUDITED
@@ -56,8 +56,8 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: analytics.md
-    next: "Make chart distance display use goal_met's hundredths; reword AN-009; add tests"
-    drift: "Design claim false: 0.995 displays \"0.99 mi\" but counts as goal-met"
+    next: "Reword AN-009 (bold yellow); add tests for AN-007..010"
+    drift: "AN-009 says yellow; code renders bold yellow"
 
   navigation:
     status: AUDITED

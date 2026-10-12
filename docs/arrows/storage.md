@@ -4,7 +4,7 @@ Local SQLite persistence of the run history — location, schema, stored formats
 
 ## Status
 
-**PARTIAL** — audited 2026-10-12 (git SHA `88de5b9`). 14 of 15 specs verified against code; STORE-014's startup repair is broader than specified.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); STORE-014's repair scope fixed afterwards and covered by a test. All 15 specs implemented.
 
 ## References
 
@@ -46,19 +46,15 @@ Local SQLite persistence of the run history — location, schema, stored formats
 
 ## Key Findings
 
-1. **STORE-014 repair too broad** — `repair_start_times` (`src/db/migrations.rs`) truncates every `time_started` longer than 8 characters, not only fractional-second values; a malformed hand-edited value (e.g. `"bad\nvalue"`) is silently cut instead of left for STORE-015's error. Values written by the app (`HH:MM:SS`, `HH:MM:SS.ffffff`) are unaffected.
-2. **Unreadable distance not named** — a non-numeric `distance_miles` fails `get_all_runs` with a raw rusqlite error that names no run (`query_runs`), unlike STORE-015's date/time/timestamp errors. Not covered by a spec.
-3. **Missing rows on update/delete** — updating or deleting an id that no longer exists succeeds silently. Not covered by a spec.
-4. **No schema versioning**; **unused surface** (`get_runs_by_date_range`, `idx_runs_created_at`).
+1. **Unreadable distance not named** — a non-numeric `distance_miles` fails `get_all_runs` with a raw rusqlite error that names no run (`query_runs`), unlike STORE-015's date/time/timestamp errors. Not covered by a spec.
+2. **Missing rows on update/delete** — updating or deleting an id that no longer exists succeeds silently. Not covered by a spec.
+3. **No schema versioning**; **unused surface** (`get_runs_by_date_range`, `idx_runs_created_at`).
 
 ## Work Required
 
-### Must Fix
-1. Restrict the startup repair to `HH:MM:SS.<digits>` values (STORE-014).
-
 ### Should Fix
-2. Decide whether an unreadable distance should get a STORE-015-style error.
-3. Add tests for STORE-001 to STORE-006 and STORE-008 to STORE-012.
+1. Decide whether an unreadable distance should get a STORE-015-style error.
+2. Add tests for STORE-001 to STORE-006 and STORE-008 to STORE-012.
 
 ### Nice to Have
-4. Schema versioning before the next schema change; remove or use `get_runs_by_date_range` and `idx_runs_created_at`.
+3. Schema versioning before the next schema change; remove or use `get_runs_by_date_range` and `idx_runs_created_at`.

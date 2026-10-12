@@ -68,7 +68,7 @@ The screen (`src/ui/screens/analytics/`, 1-cell margin) stacks three rows: Strea
 └───────────────────────────────────────────┘└──────────────────────────────┘
 ```
 
-Day lines: date `MM/DD`, the day's total to two decimals, and a bar of 10 `█` per mile (max 50), computed from the rounded total so a day shown as "1.00 mi" gets exactly 10. When the panel is too short for all fourteen day lines, the oldest days are dropped so today is always on screen. Color follows the rounded total: goal-met bold green, above 0.00 yellow, otherwise red (`AN-011`). Month lines: bold green at 50 miles or more, yellow at 25 or more (`AN-012`). With no runs, both bottom panels show "No data to display" (`AN-013`).
+Day lines: date `MM/DD`, the day's total to two decimals — formatted from the same whole-hundredths integer that `goal_met` compares, so the shown value and the goal status cannot disagree — and a bar of 10 `█` per mile (max 50), computed from the rounded total so a day shown as "1.00 mi" gets exactly 10. When the panel is too short for all fourteen day lines, the oldest days are dropped so today is always on screen. Color follows the rounded total: goal-met bold green, above 0.00 yellow, otherwise red (`AN-011`). Month lines: bold green at 50 miles or more, yellow at 25 or more (`AN-012`). With no runs, both bottom panels show "No data to display" (`AN-013`).
 
 The module is split by panel so each file stays within the project's 300-line limit: `mod.rs` (layout and error panel), `streaks.rs`, `stats.rs`, and `history.rs` (the 14-day chart and monthly breakdown).
 
@@ -79,6 +79,7 @@ The module is split by panel so each file stays within the project's 300-line li
 | Unit of the goal | Sum of all runs on a local calendar date | Single run must reach 1 mile; rolling 24 hours | Several short runs on one day count, and "a day" means the user's own calendar day. |
 | Today in the current streak | An unfinished today extends the streak once goal-met but never breaks it | Always count back from today; always count only through yesterday | The streak should not read 0 every morning; it only breaks once a whole day has passed without a mile. |
 | Goal comparison precision | Round each daily total to hundredths, then compare with 1.00 | Exact `f64` `>=`; a tiny epsilon; store distances as integer hundredths | Matches the two-decimal display, so what the user sees always agrees with goal status; absorbs floating-point error; leans generous per the HLD tenet. |
+| Displayed distance on the chart | Format from the integer hundredths that `goal_met` uses | Rust's `{:.2}` | `{:.2}` rounds the exact binary value, so a 0.995 total displays "0.99" while ×100-and-round gives 100 and counts as goal-met; formatting from one integer keeps screen and goal status in step. |
 | Runs after today | Dropped once before any figure is computed | Exclude only from period windows | Every figure describes the same history; legacy future-dated rows cannot inflate streaks or totals. |
 | "Today" as a parameter | `calculate_analytics(runs, today)` | Read the clock inside | Date-dependent rules (streak through yesterday, windows ending today) are testable at a fixed date. |
 | Year goal target | 365 goal-met days per calendar year | Days elapsed so far this year; 366 in leap years | A fixed, memorable target: a mile every day of the year. |

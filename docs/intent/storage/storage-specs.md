@@ -9,7 +9,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 - [x] **STORE-001**: On startup, the system shall open the run database at `runlogger/runs.db` inside the platform's per-user data directory, creating the `runlogger` directory and the database file if they do not exist.
 - [x] **STORE-002**: If the per-user data directory cannot be determined, or the `runlogger` directory or database cannot be created or opened, then the system shall exit with an error message before the terminal UI is shown.
 - [x] **STORE-003**: On startup, the system shall create the `runs` table and its indexes if they do not exist, and shall leave any existing run data unchanged apart from the start-time repair (STORE-014).
-- [x] **STORE-014**: On startup, after creating the schema, the system shall rewrite every stored start time that has fractional seconds to whole seconds, leaving unchanged any row whose rewritten time would duplicate another run's date and start time, and shall continue starting up if the rewrite fails.
+- [x] **STORE-014**: On startup, after creating the schema, the system shall rewrite every stored start time of the form `HH:MM:SS` followed by a dot and fractional-second digits to whole seconds, leaving every other stored value unchanged and leaving unchanged any row whose rewritten time would duplicate another run's date and start time, and shall continue starting up if the rewrite fails.
 
 ## Persisted Shape
 
