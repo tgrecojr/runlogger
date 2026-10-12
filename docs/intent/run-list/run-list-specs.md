@@ -2,7 +2,7 @@
 
 Design: `docs/intent/run-list/run-list-design.md` · Prefix: `RL`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/input/tests.rs` (RL-010, RL-011, RL-012, RL-013), `src/ui/tests.rs` (RL-004, RL-007, RL-012).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. The tests citing each spec are listed in `docs/arrows/run-list.md`, regenerated from `@spec` scans.
 
 ## Loading
 

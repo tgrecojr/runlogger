@@ -57,3 +57,6 @@ pub(super) fn handle_run_list_input(app: &mut App, key: KeyEvent, conn: &Connect
         _ => {}
     }
 }
+
+#[cfg(test)]
+mod tests;

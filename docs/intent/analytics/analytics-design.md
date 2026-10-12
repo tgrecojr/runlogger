@@ -53,7 +53,7 @@ The screen (`src/ui/screens/analytics/`, 1-cell margin) stacks three rows: Strea
 │Current Streak: 12 days (run today to extend)  ← streak bold green if > 0,│
 │                                  else red; hint yellow, AN-016          │
 │Longest Streak: 40 days                                                  │
-│Year Goal (365 days @ 1mi): 80 days (78.1%)  ← yellow < 100 left;        │
+│Year Goal (365 days @ 1mi): 80 days (78.1%)  ← bold yellow < 100 left;        │
 └─────────────────────────────────────────────    "Goal Complete! 🎉 (100.0%)" when none left
 ┌Totals─────────────┐┌Week──────────────┐┌Period──────────────┐
 │Total Runs: 300    ││This Week: 7 runs ││This Month: 30 runs │
@@ -103,6 +103,6 @@ The module is split by panel so each file stays within the project's 300-line li
 
 - Code: `src/logic/streak.rs`, `src/models/analytics.rs`, `src/ui/screens/analytics/`, `src/input/mod.rs` (`load_analytics`), `src/ui/theme.rs` (goal styles)
 - Specs: `docs/intent/analytics/analytics-specs.md`
-- Tests: `src/logic/streak/tests.rs`, `src/input/tests.rs`, `src/ui/tests.rs`
+- Tests: listed in `docs/arrows/analytics.md`
 - Depends on: Storage (`STORE`) for the history read; Navigation (`NAV`) for opening the screen and error handling
 - External: `chrono` 0.4, `ratatui` 0.30

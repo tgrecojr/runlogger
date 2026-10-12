@@ -82,7 +82,7 @@ None.
 ## References
 
 - Code: `src/app.rs`, `src/input/run_list.rs`, `src/input/mod.rs` (`load_runs`), `src/ui/screens/run_list.rs`
-- Tests: `src/input/tests.rs`, `src/ui/tests.rs`
+- Tests: listed in `docs/arrows/run-list.md`
 - Specs: `docs/intent/run-list/run-list-specs.md`
 - Depends on: Storage (`STORE`) for the history read and delete; Quick Entry (`QE`) for editing; Navigation (`NAV`) for opening the screen and error handling
 - External: `ratatui` 0.30 (`Table`), `crossterm` 0.29

@@ -4,7 +4,7 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`). All 13 specs verified against code.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`). All 13 specs implemented and tested.
 
 ## References
 
@@ -18,8 +18,11 @@ The history view: full run list newest first, selection, edit hand-off and immed
 - docs/intent/run-list/run-list-specs.md (13 specs)
 
 ### Tests
-- src/input/tests.rs (RL-010, RL-011, RL-012, RL-013)
-- src/ui/tests.rs (RL-004, RL-007, RL-012)
+- src/input/run_list/tests.rs (RL-001, RL-006, RL-008, RL-009)
+- src/input/tests/edits.rs (RL-010, RL-011)
+- src/input/tests/errors.rs (RL-012, RL-013)
+- src/ui/screens/run_list/tests.rs (RL-002, RL-003, RL-005)
+- src/ui/tests/run_list.rs (RL-004, RL-007, RL-012)
 
 ### Code
 - src/app.rs (RL-011)
@@ -41,13 +44,13 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 | Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
 |----------|----------|-------------|----------|------|--------|
-| Loading | RL-001 | 1 | 0 | 0 | 0 |
-| Display | RL-002, RL-003, RL-004, RL-005 | 4 | 0 | 0 | 1 |
-| Selection | RL-006, RL-007 | 2 | 0 | 0 | 1 |
-| Edit and Delete | RL-008, RL-009, RL-010, RL-011 | 4 | 0 | 0 | 2 |
+| Loading | RL-001 | 1 | 0 | 0 | 1 |
+| Display | RL-002, RL-003, RL-004, RL-005 | 4 | 0 | 0 | 4 |
+| Selection | RL-006, RL-007 | 2 | 0 | 0 | 2 |
+| Edit and Delete | RL-008, RL-009, RL-010, RL-011 | 4 | 0 | 0 | 4 |
 | Errors | RL-012, RL-013 | 2 | 0 | 0 | 2 |
 
-**Summary:** 13 of 13 specs marked implemented; 6 of 13 cited by a test. Untested: RL-001, RL-002, RL-003, RL-005, RL-006, RL-008, RL-009.
+**Summary:** 13 of 13 specs marked implemented; 13 of 13 cited by a test. Untested: none.
 
 ## Key Findings
 
@@ -57,8 +60,5 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 ## Work Required
 
-### Should Fix
-1. Add tests for RL-001 to RL-003, RL-005, RL-006, RL-008 and RL-009.
-
 ### Nice to Have
-2. Wrap long error messages; singular "1 run"; keep the selection when `2` is pressed on Run List.
+1. Wrap long error messages; singular "1 run"; keep the selection when `2` is pressed on Run List.

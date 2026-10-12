@@ -20,7 +20,7 @@ arrows:
     blocks: [quick-entry, run-list, analytics, navigation]
     blockedBy: []
     detail: storage.md
-    next: "Add tests for untested STORE specs; decide unreadable-distance error"
+    next: "Decide unreadable-distance error; schema versioning before the next schema change"
     drift: null
 
   quick-entry:
@@ -32,7 +32,7 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: quick-entry.md
-    next: "Decide QE-020 cause text; add tests for untested QE specs"
+    next: "Decide Date refresh across midnight"
     drift: null
 
   run-list:
@@ -44,7 +44,7 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: run-list.md
-    next: "Add tests for untested RL specs; wrap long error line"
+    next: "Wrap long error line; singular \"1 run\""
     drift: null
 
   analytics:
@@ -56,8 +56,8 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: analytics.md
-    next: "Reword AN-009 (bold yellow); add tests for AN-007..010"
-    drift: "AN-009 says yellow; code renders bold yellow"
+    next: "Judge monthly colors on the displayed total; clarify rolling-period labels"
+    drift: null
 
   navigation:
     status: AUDITED
@@ -68,5 +68,5 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: navigation.md
-    next: "Reword NAV-004/010/012/015; add key-routing and lifecycle tests"
-    drift: "Spec wording broader than behavior: NAV-004, NAV-010, NAV-012, NAV-015"
+    next: "Decide on making the terminal lifecycle (NAV-001..004) testable"
+    drift: null

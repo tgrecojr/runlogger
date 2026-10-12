@@ -116,3 +116,6 @@ fn render_hints(f: &mut Frame, area: Rect) {
 
     f.render_widget(hints, area);
 }
+
+#[cfg(test)]
+mod tests;

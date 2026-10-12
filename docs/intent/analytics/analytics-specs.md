@@ -2,7 +2,7 @@
 
 Design: `docs/intent/analytics/analytics-design.md` · Prefix: `AN`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/logic/streak/tests.rs` (AN-001 to AN-006, AN-011, AN-013, AN-015), `src/input/tests.rs` (AN-014), `src/ui/tests.rs` (AN-011 to AN-014, AN-016).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. The tests citing each spec are listed in `docs/arrows/analytics.md`, regenerated from `@spec` scans.
 
 ## Daily Goal
 
@@ -21,7 +21,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 ## Screen
 
 - [x] **AN-008**: When the user opens the Analytics screen with `3` or Esc → `3`, the system shall recompute all analytics from the full run history as of today's local date.
-- [x] **AN-009**: The Analytics screen shall show a Streaks panel with the current streak in days (bold green when above 0, red otherwise), the longest streak in days, and the year goal as "N days (P%)" remaining — in yellow when fewer than 100 days remain, and as "Goal Complete! 🎉 (100.0%)" in bold green when none remain.
+- [x] **AN-009**: The Analytics screen shall show a Streaks panel with the current streak in days (bold green when above 0, red otherwise), the longest streak in days, and the year goal as "N days (P%)" remaining — in bold yellow when fewer than 100 days remain, and as "Goal Complete! 🎉 (100.0%)" in bold green when none remain.
 - [x] **AN-016**: While the current streak is above 0 and today is not yet goal-met, the Streaks panel shall show "(run today to extend)" in yellow after the current streak.
 - [x] **AN-010**: The Analytics screen shall show a Totals panel (total runs, total distance and average per run), a Week panel (runs and average for the last 7 days), and a Period panel (runs and average for the last 30 days and for the current year), with distances to two decimal places.
 - [x] **AN-011**: The Analytics screen shall show a Last 14 Days panel, beside the Mileage by Month panel, with one line per date for the fourteen dates ending today, giving the date as `MM/DD`, the day's total distance to two decimals rounded exactly as the goal rule rounds it (AN-001) so that the shown distance and the goal status always agree, and a bar of 10 `█` characters per mile capped at 50, colored bold green when the day is goal-met, yellow when its total rounded to hundredths is above 0.00 but not goal-met, and red otherwise; if the panel is too short for all fourteen day lines, the system shall omit the oldest dates so that today is always shown.

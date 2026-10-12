@@ -85,7 +85,7 @@ A history read is all-or-nothing: if any row's date, start time or `created_at` 
 
 Row decoding is shared by every read: `query_runs` fetches rows as raw column values (`StoredRun`) and `to_run` converts each to a `Run`, outside the SQLite row callback, so conversion errors carry ordinary `anyhow` context.
 
-Uniqueness violations and other SQLite errors surface to the caller as `anyhow` errors with context ("Failed to insert run", "Failed to update run", "Failed to delete run"). Quick Entry shows insert/update errors inline (`QE-020`); Run List and Analytics show read and delete errors on their own screens (`RL-012`, `RL-013`, `AN-014`).
+A uniqueness violation on insert or update is reported as a typed `StorageError::DuplicateStart { date, time }` (a `thiserror` enum inside the `anyhow` error), recognized from SQLite's extended result code `SQLITE_CONSTRAINT_UNIQUE`, so callers can tell the user exactly which run conflicts (`STORE-005`). Other SQLite errors surface as `anyhow` errors with context ("Failed to insert run", "Failed to update run", "Failed to delete run").
 
 ## Decisions & Alternatives
 
@@ -94,7 +94,7 @@ Uniqueness violations and other SQLite errors surface to the caller as `anyhow` 
 | Storage engine | Embedded SQLite via `rusqlite` with the `bundled` feature | JSON/CSV flat file; system SQLite | Single-user local app wants a durable file with real constraints and ordering; `bundled` avoids depending on the OS's libsqlite version. |
 | Database location | `dirs::data_dir()/runlogger/runs.db` | Working directory; config flag; XDG override | Platform-conventional per-user data location; app works from any directory with no setup. |
 | Date/time representation | Separate naive-local `date` and `time_started` TEXT columns | Single UTC timestamp; Unix epoch integer | The local calendar day is the unit of the daily goal, so the date is stored directly rather than derived from a zone-dependent instant; ISO text sorts correctly. |
-| Duplicate protection | `UNIQUE(date, time_started)` | No constraint; dedupe in app | Guards against double-submitting the same entry. |
+| Duplicate protection | `UNIQUE(date, time_started)`, reported as a typed `DuplicateStart` error | No constraint; dedupe in app; callers match SQLite's message text | Guards against double-submitting the same entry; a typed error lets the UI explain the conflict without depending on SQLite's wording. |
 | Schema evolution | `CREATE ... IF NOT EXISTS` on every launch | Versioned migrations (`user_version` pragma, migration crate) | Only one schema version has ever existed. |
 | Read strategy | Load the entire table on each screen switch | Date-range queries; SQL aggregation for analytics | Data volume is tiny; in-memory computation keeps analytics logic in Rust and testable without SQL. |
 | Connection lifetime | One connection for the process, passed by reference | Open per operation; pool | Single-threaded event loop, single user. |
@@ -112,7 +112,7 @@ Uniqueness violations and other SQLite errors surface to the caller as `anyhow` 
 ## References
 
 - Code: `src/db/connection.rs`, `src/db/migrations.rs`, `src/db/queries.rs`, the `Run` struct in `src/models/run.rs`
-- Tests: `src/db/queries/tests.rs`
+- Tests: listed in `docs/arrows/storage.md`
 - Specs: `docs/intent/storage/storage-specs.md`
 - Consumers: Quick Entry (`QE`) for insert/update; Run List (`RL`) for read/delete; Analytics (`AN`) for read; Navigation (`NAV`) for startup and error propagation
 - External: `rusqlite` 0.40 (bundled SQLite), `chrono` 0.4, `dirs` 7, `anyhow` 1

@@ -2,7 +2,7 @@
 
 Design: `docs/intent/storage/storage-design.md` · Prefix: `STORE`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/db/queries/tests.rs` (STORE-007, STORE-013, STORE-014, STORE-015).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. The tests citing each spec are listed in `docs/arrows/storage.md`, regenerated from `@spec` scans.
 
 ## Location and Startup
 
@@ -14,7 +14,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 ## Persisted Shape
 
 - [x] **STORE-004**: The system shall persist each run with an automatically assigned integer id, a date, a start time, a distance in miles, an optional note, and a creation timestamp, where every field except the note is required.
-- [x] **STORE-005**: If an insert or update would leave two runs with the same date and the same start time, then the system shall reject the write with an error.
+- [x] **STORE-005**: If an insert or update would leave two runs with the same date and the same start time, then the system shall reject the write with an error that identifies it as a duplicate of an existing run's date and start time.
 - [x] **STORE-006**: The system shall persist a run's date as local-calendar text in `YYYY-MM-DD` form, with no time zone.
 - [x] **STORE-007**: The system shall persist a run's start time as local text in `HH:MM:SS` form, with whole seconds and no time zone, regardless of whether the time was typed by the user or taken from the clock.
 - [x] **STORE-008**: The system shall persist a run's creation timestamp as RFC 3339 text in UTC, set when the run is first created.

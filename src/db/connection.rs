@@ -5,7 +5,13 @@ use std::path::PathBuf;
 
 // @spec STORE-001, STORE-002
 pub fn get_db_path() -> Result<PathBuf> {
-    let data_dir = dirs::data_dir().context("Failed to get data directory")?;
+    db_path_in(dirs::data_dir())
+}
+
+/// `runlogger/runs.db` inside the per-user data directory, creating
+/// `runlogger` if needed.
+fn db_path_in(data_dir: Option<PathBuf>) -> Result<PathBuf> {
+    let data_dir = data_dir.context("Failed to get data directory")?;
 
     let app_dir = data_dir.join("runlogger");
 
@@ -28,3 +34,6 @@ pub fn init_db(db_path: &PathBuf) -> Result<Connection> {
     crate::db::migrations::init_database(&conn).context("Failed to initialize database")?;
     Ok(conn)
 }
+
+#[cfg(test)]
+mod tests;

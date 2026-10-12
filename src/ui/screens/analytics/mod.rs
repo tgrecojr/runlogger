@@ -48,3 +48,6 @@ fn render_error(f: &mut Frame, area: Rect, error: &str) {
         .block(Block::default().borders(Borders::ALL).title("Analytics"));
     f.render_widget(panel, area);
 }
+
+#[cfg(test)]
+mod tests;

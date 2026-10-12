@@ -25,7 +25,7 @@ Five components, each with a design doc and EARS specs under `docs/intent/<compo
 - **analytics** (`AN`) — daily-goal rule, streaks, statistics: `src/logic/streak.rs`, `src/models/analytics.rs`, `src/ui/screens/analytics/`, `load_analytics` in `src/input/mod.rs`
 - **navigation** (`NAV`) — lifecycle, event loop, key routing, header/footer, Help, theme: `src/main.rs`, `handle_key_event` in `src/input/mod.rs`, `App`/`Screen` in `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`
 
-Tests are inline `#[cfg(test)]` modules beside the code (`src/db/queries/tests.rs`, `src/logic/streak/tests.rs`, `src/input/tests.rs`, `src/ui/tests.rs`, inline in `src/logic/validation.rs`), sharing helpers from `src/test_support.rs`.
+Tests are `#[cfg(test)]` modules beside the code they test (a `tests.rs` or `tests/` folder next to each module), sharing helpers from `src/test_support.rs` (in-memory database, raw rows, key events, full-UI rendering). Each test that exercises a spec carries a `// @spec` comment; `docs/arrows/<segment>.md` lists them.
 
 ## Environment Variables
 None. The app reads no environment variables.

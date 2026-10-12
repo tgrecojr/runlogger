@@ -126,4 +126,72 @@ mod tests {
         let time = parse_time("").unwrap();
         assert_eq!(time.nanosecond(), 0);
     }
+
+    fn ymd(y: i32, m: u32, d: u32) -> NaiveDate {
+        NaiveDate::from_ymd_opt(y, m, d).unwrap()
+    }
+
+    fn hms(h: u32, m: u32, s: u32) -> NaiveTime {
+        NaiveTime::from_hms_opt(h, m, s).unwrap()
+    }
+
+    // @spec QE-008
+    #[test]
+    fn date_accepts_iso_slash_and_dash_forms() {
+        for input in ["2026-03-07", "03/07/2026", "03-07-2026"] {
+            assert_eq!(parse_date(input).unwrap(), ymd(2026, 3, 7), "{input:?}");
+        }
+    }
+
+    // @spec QE-008
+    #[test]
+    fn empty_date_uses_today() {
+        let before = Local::now().date_naive();
+        let parsed = parse_date("").unwrap();
+        let after = Local::now().date_naive();
+        assert!(parsed == before || parsed == after, "{parsed}");
+    }
+
+    // @spec QE-009
+    #[test]
+    fn time_accepts_24_hour_and_am_pm_forms() {
+        let cases = [
+            ("07:05:09", hms(7, 5, 9)),
+            ("19:05", hms(19, 5, 0)),
+            ("7:05 AM", hms(7, 5, 0)),
+            ("7:05 PM", hms(19, 5, 0)),
+            ("12:30 AM", hms(0, 30, 0)),
+            ("7:05:09 AM", hms(7, 5, 9)),
+            ("11:05:09 PM", hms(23, 5, 9)),
+        ];
+        for (input, expected) in cases {
+            assert_eq!(parse_time(input).unwrap(), expected, "{input:?}");
+        }
+    }
+
+    // @spec QE-011
+    #[test]
+    fn unrecognized_date_is_rejected_with_format_hint() {
+        for input in ["2026/03/07", "March 7", "2026-13-01", "abc", "07.03.2026"] {
+            let err = parse_date(input).unwrap_err();
+            assert_eq!(
+                err.to_string(),
+                "Invalid date format. Use YYYY-MM-DD",
+                "{input:?}"
+            );
+        }
+    }
+
+    // @spec QE-011
+    #[test]
+    fn unrecognized_time_is_rejected_with_format_hint() {
+        for input in ["25:00", "7pm", "abc", "07-05", "13:05 PM"] {
+            let err = parse_time(input).unwrap_err();
+            assert_eq!(
+                err.to_string(),
+                "Invalid time format. Use HH:MM or HH:MM:SS",
+                "{input:?}"
+            );
+        }
+    }
 }

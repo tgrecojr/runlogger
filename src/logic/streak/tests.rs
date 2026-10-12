@@ -135,3 +135,72 @@ fn only_future_runs_is_treated_as_an_empty_history() {
     assert!(a.recent_trend.is_empty());
     assert!(a.monthly_breakdown.is_empty());
 }
+
+fn ymd(year: i32, month: u32, day: u32) -> NaiveDate {
+    NaiveDate::from_ymd_opt(year, month, day).unwrap()
+}
+
+// @spec AN-007
+#[test]
+fn monthly_breakdown_totals_counts_and_averages_each_month() {
+    let runs = vec![
+        run(ymd(2025, 6, 1), 1.0),
+        run(ymd(2025, 6, 10), 2.0),
+        run(ymd(2025, 6, 15), 3.5),
+        run(ymd(2025, 4, 30), 4.0),
+    ];
+    let months = calculate_analytics(&runs, today()).monthly_breakdown;
+
+    assert_eq!(months.len(), 2);
+    let june = &months[0];
+    assert_eq!((june.year, june.month), (2025, 6));
+    assert_eq!(june.run_count, 3);
+    assert!((june.total_distance - 6.5).abs() < 1e-9);
+    assert!((june.average_distance - 6.5 / 3.0).abs() < 1e-9);
+    let april = &months[1];
+    assert_eq!((april.year, april.month), (2025, 4));
+    assert_eq!(april.run_count, 1);
+    assert!((april.total_distance - 4.0).abs() < 1e-9);
+    assert!((april.average_distance - 4.0).abs() < 1e-9);
+}
+
+// @spec AN-007
+#[test]
+fn monthly_breakdown_is_the_twelve_newest_months_with_runs_newest_first() {
+    // Fourteen months with runs from 2024-03 to 2025-06, skipping 2025-05
+    // and 2024-12; given oldest first to show the order is not input order.
+    let mut runs = Vec::new();
+    let mut month_starts = Vec::new();
+    for (year, month) in (3..=12)
+        .map(|m| (2024, m))
+        .chain((1..=6).map(|m| (2025, m)))
+    {
+        if (year, month) == (2025, 5) || (year, month) == (2024, 12) {
+            continue;
+        }
+        month_starts.push((year, month));
+        runs.push(run(ymd(year, month, 1), 1.0));
+    }
+    assert_eq!(month_starts.len(), 14);
+
+    let months = calculate_analytics(&runs, today()).monthly_breakdown;
+    let shown: Vec<(i32, u32)> = months.iter().map(|m| (m.year, m.month)).collect();
+
+    assert_eq!(
+        shown,
+        vec![
+            (2025, 6),
+            (2025, 4),
+            (2025, 3),
+            (2025, 2),
+            (2025, 1),
+            (2024, 11),
+            (2024, 10),
+            (2024, 9),
+            (2024, 8),
+            (2024, 7),
+            (2024, 6),
+            (2024, 5),
+        ]
+    );
+}

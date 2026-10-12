@@ -4,7 +4,7 @@ The daily-goal measures (current/longest streak, year goal), volume statistics, 
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); chart distances now formatted from the goal rule's hundredths (AN-011), so display and goal status agree. All 16 specs implemented.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then AN-011 (display rounding) was changed and AN-009 reworded. All 16 specs implemented and tested.
 
 ## References
 
@@ -18,9 +18,10 @@ The daily-goal measures (current/longest streak, year goal), volume statistics, 
 - docs/intent/analytics/analytics-specs.md (16 specs)
 
 ### Tests
-- src/input/tests.rs (AN-014)
-- src/logic/streak/tests.rs (AN-001, AN-002, AN-003, AN-004, AN-005, AN-006, AN-011, AN-013, AN-015)
-- src/ui/tests.rs (AN-001, AN-011, AN-012, AN-013, AN-014, AN-016)
+- src/input/tests/errors.rs (AN-014)
+- src/logic/streak/tests.rs (AN-001, AN-002, AN-003, AN-004, AN-005, AN-006, AN-007, AN-011, AN-013, AN-015)
+- src/ui/screens/analytics/tests.rs (AN-008, AN-009, AN-010)
+- src/ui/tests/analytics.rs (AN-001, AN-011, AN-012, AN-013, AN-014, AN-016)
 
 ### Code
 - src/input/mod.rs (AN-008, AN-014)
@@ -46,23 +47,18 @@ The daily-goal measures (current/longest streak, year goal), volume statistics, 
 | Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
 |----------|----------|-------------|----------|------|--------|
 | Daily Goal | AN-001, AN-002, AN-003, AN-004 | 4 | 0 | 0 | 4 |
-| Statistics | AN-005, AN-006, AN-007, AN-015 | 4 | 0 | 0 | 3 |
-| Screen | AN-008, AN-009, AN-016, AN-010, AN-011, AN-012, AN-013, AN-014 | 8 | 0 | 0 | 5 |
+| Statistics | AN-005, AN-006, AN-007, AN-015 | 4 | 0 | 0 | 4 |
+| Screen | AN-008, AN-009, AN-016, AN-010, AN-011, AN-012, AN-013, AN-014 | 8 | 0 | 0 | 8 |
 
-**Summary:** 16 of 16 specs marked implemented; 12 of 16 cited by a test. Untested: AN-007, AN-008, AN-009, AN-010.
+**Summary:** 16 of 16 specs marked implemented; 16 of 16 cited by a test. Untested: none.
 
 ## Key Findings
 
-1. **AN-009 wording** — the year-goal text is **bold** yellow when fewer than 100 days remain; the spec says "in yellow".
-2. **Tiny panels** — when the chart panel is under 5 rows tall, no day lines show, not even today (AN-011's "today is always shown" assumes room for one line).
-3. **Monthly thresholds use the raw total** — 49.96 mi displays as "50.0 mi" in yellow.
-4. **Stale "today"** when the screen stays open past midnight; rolling-period labels read as calendar periods.
+1. **Tiny panels** — when the chart panel is under 5 rows tall, no day lines show, not even today.
+2. **Monthly thresholds use the raw total** — 49.96 mi displays as "50.0 mi" in yellow.
+3. **Stale "today"** when the screen stays open past midnight; rolling-period labels read as calendar periods.
 
 ## Work Required
 
-### Should Fix
-1. Reword AN-009 to "bold yellow" (or make the text non-bold).
-2. Add tests for AN-007 to AN-010.
-
 ### Nice to Have
-3. Judge monthly colors on the displayed (one-decimal) total; clarify rolling-period labels.
+1. Judge monthly colors on the displayed (one-decimal) total; clarify rolling-period labels.

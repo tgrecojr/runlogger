@@ -27,7 +27,7 @@ main
  └─ restore_terminal        leave raw mode + alternate screen, show cursor
 ```
 
-The database is opened before the terminal enters raw mode, so startup failures are readable. The panic hook disables raw mode and leaves the alternate screen, then chains to the original hook. `run_app` redraws every iteration and polls for input with a 100 ms timeout; a terminal input/output error breaks the loop and exits after restoring the terminal.
+The database is opened before the terminal enters raw mode, so startup failures are readable. The panic hook disables raw mode and leaves the alternate screen, then chains to the original hook. `run_app` draws, then waits up to 100 ms for input, so the screen redraws after every key and at roughly 100 ms intervals while idle; a terminal input/output error breaks the loop and exits after restoring the terminal.
 
 ## Key Routing
 
@@ -95,7 +95,6 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 
 - Code: `src/main.rs`, `src/input/mod.rs`, `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`, `src/ui/components/*`
 - Specs: `docs/intent/navigation/navigation-specs.md`
-- Tests: `src/input/tests.rs`, `src/ui/tests.rs`
-- Test support: `src/test_support.rs` (in-memory database, raw rows, write-blocking triggers, key constructors)
+- Tests: listed in `docs/arrows/navigation.md`
 - Triggers: Storage startup (`STORE-001`), Run List load (`RL-001`), Analytics load (`AN-008`), Quick Entry clear (`QE-007`) and edit cancel (`QE-023`)
 - External: `crossterm` 0.29, `ratatui` 0.30, `anyhow` 1
