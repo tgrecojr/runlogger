@@ -56,8 +56,8 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: analytics.md
-    next: "Fix AN-002 (streak from yesterday while today unfinished), AN-001 (rounding tolerance), AN-011 (14-day chart), AN-004/AN-006 (windows end today); add tests"
-    drift: "Gaps AN-001, AN-002, AN-004, AN-006, AN-011"
+    next: "Add tests for AN-007..010; clarify rolling-period labels"
+    drift: null
 
   navigation:
     status: MAPPED

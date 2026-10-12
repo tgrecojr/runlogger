@@ -22,10 +22,10 @@ Five components, each with a design doc and EARS specs under `docs/intent/<compo
 - **storage** (`STORE`) — `src/db/`: database location, schema, stored formats, insert/read/update/delete
 - **quick-entry** (`QE`) — the logging form: `QuickEntryState` in `src/app.rs`, `src/input/quick_entry.rs`, `src/logic/validation.rs`, `Run::new` in `src/models/run.rs`, `src/ui/screens/quick_entry.rs`
 - **run-list** (`RL`) — history view: `RunListState`, `src/input/run_list.rs`, `load_runs` in `src/input/mod.rs`, `src/ui/screens/run_list.rs`
-- **analytics** (`AN`) — daily-goal rule, streaks, statistics: `src/logic/streak.rs`, `src/models/analytics.rs`, `src/ui/screens/analytics.rs`, `load_analytics` in `src/input/mod.rs`
+- **analytics** (`AN`) — daily-goal rule, streaks, statistics: `src/logic/streak.rs`, `src/models/analytics.rs`, `src/ui/screens/analytics/`, `load_analytics` in `src/input/mod.rs`
 - **navigation** (`NAV`) — lifecycle, event loop, key routing, header/footer, Help, theme: `src/main.rs`, `handle_key_event` in `src/input/mod.rs`, `App`/`Screen` in `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`
 
-Tests are inline `#[cfg(test)]` modules beside the code (`src/db/queries/tests.rs`, `src/input/tests.rs`, `src/ui/tests.rs`, inline in `src/logic/validation.rs`), sharing helpers from `src/test_support.rs`.
+Tests are inline `#[cfg(test)]` modules beside the code (`src/db/queries/tests.rs`, `src/logic/streak/tests.rs`, `src/input/tests.rs`, `src/ui/tests.rs`, inline in `src/logic/validation.rs`), sharing helpers from `src/test_support.rs`.
 
 ## Environment Variables
 None. The app reads no environment variables.
