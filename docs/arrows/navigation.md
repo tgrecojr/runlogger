@@ -4,7 +4,7 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then NAV-004, NAV-010, NAV-012 and NAV-015 were reworded to match intended behavior. All 18 specs implemented; NAV-001 to NAV-004 (terminal lifecycle in `main.rs`) have no automated test.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then the lifecycle moved to `src/lifecycle.rs` with injectable side effects, NAV-019 (ignore key releases) was added, and four specs were reworded. All 19 specs implemented and tested.
 
 ## References
 
@@ -15,17 +15,20 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 - docs/intent/navigation/navigation-design.md
 
 ### EARS
-- docs/intent/navigation/navigation-specs.md (18 specs)
+- docs/intent/navigation/navigation-specs.md (19 specs)
 
 ### Tests
 - src/input/tests/edits.rs (NAV-018)
 - src/input/tests/errors.rs (NAV-017)
+- src/input/tests/key_events.rs (NAV-019)
 - src/input/tests/routing.rs (NAV-005, NAV-006, NAV-007, NAV-008, NAV-009, NAV-010, NAV-011, NAV-012)
+- src/lifecycle/tests.rs (NAV-001, NAV-002, NAV-003, NAV-004)
 - src/ui/tests/chrome.rs (NAV-013, NAV-014, NAV-015, NAV-016)
 
 ### Code
-- src/input/mod.rs (NAV-005, NAV-006, NAV-007, NAV-008, NAV-009, NAV-010, NAV-011, NAV-012, NAV-017, NAV-018)
-- src/main.rs (NAV-001, NAV-002, NAV-003, NAV-004)
+- src/input/mod.rs (NAV-005, NAV-006, NAV-007, NAV-008, NAV-009, NAV-010, NAV-011, NAV-012, NAV-017, NAV-018, NAV-019)
+- src/lifecycle.rs (NAV-001, NAV-002, NAV-003, NAV-004)
+- src/main.rs (NAV-001, NAV-002, NAV-003)
 - src/ui/mod.rs (NAV-013, NAV-014, NAV-016)
 - src/ui/screens/help.rs (NAV-015, NAV-016)
 
@@ -45,26 +48,22 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 
 | Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
 |----------|----------|-------------|----------|------|--------|
-| Lifecycle | NAV-001, NAV-002, NAV-003, NAV-004 | 4 | 0 | 0 | 0 |
+| Lifecycle | NAV-001, NAV-002, NAV-003, NAV-004 | 4 | 0 | 0 | 4 |
 | Quitting | NAV-005, NAV-006 | 2 | 0 | 0 | 2 |
 | Esc Prefix | NAV-007, NAV-008, NAV-009, NAV-010, NAV-018 | 5 | 0 | 0 | 5 |
-| Direct Keys | NAV-011, NAV-012 | 2 | 0 | 0 | 2 |
+| Direct Keys | NAV-011, NAV-012, NAV-019 | 3 | 0 | 0 | 3 |
 | Shared Chrome | NAV-013, NAV-014, NAV-015, NAV-016 | 4 | 0 | 0 | 4 |
 | Failures | NAV-017 | 1 | 0 | 0 | 1 |
 
-**Summary:** 18 of 18 specs marked implemented; 14 of 18 cited by a test. Untested: NAV-001, NAV-002, NAV-003, NAV-004.
+**Summary:** 19 of 19 specs marked implemented; 19 of 19 cited by a test. Untested: none.
 
 ## Key Findings
 
-1. **Lifecycle untested** — NAV-001 to NAV-004 run against the real terminal (raw mode, alternate screen, panic hook) and crossterm's global event queue, so they need the event loop restructured around an injectable terminal and event source before they can be unit-tested.
-2. **Key presses only** — key events are not filtered to presses; on Windows, crossterm also reports releases, so each key could act twice.
-3. **Modifiers ignored** — Alt+1 / Ctrl+h switch screens off Quick Entry; Ctrl+letter types the letter on Quick Entry.
-4. **No Esc-prefix indicator.**
+1. **Modifiers ignored** — Alt+1 / Ctrl+h switch screens off Quick Entry; Ctrl+letter types the letter on Quick Entry.
+2. **No Esc-prefix indicator.**
+3. **Help shows the macOS data path** on every platform (NAV-015 names the macOS location).
 
 ## Work Required
 
-### Should Fix
-1. Decide whether to restructure `run_app` around an injectable terminal and event source so NAV-001 to NAV-004 can be tested.
-
 ### Nice to Have
-2. Filter key events to presses; show an Esc-prefix indicator; show the real database path in Help; delete `ui/components` stubs; route inline colors through `theme.rs`.
+1. Show an Esc-prefix indicator; show the real database path in Help; delete `ui/components` stubs; route inline colors through `theme.rs`.

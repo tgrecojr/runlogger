@@ -4,7 +4,7 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`). All 13 specs implemented and tested.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then RL-002, RL-012 and RL-013 were changed and tested. All 13 specs implemented and tested.
 
 ## References
 
@@ -21,7 +21,7 @@ The history view: full run list newest first, selection, edit hand-off and immed
 - src/input/run_list/tests.rs (RL-001, RL-006, RL-008, RL-009)
 - src/input/tests/edits.rs (RL-010, RL-011)
 - src/input/tests/errors.rs (RL-012, RL-013)
-- src/ui/screens/run_list/tests.rs (RL-002, RL-003, RL-005)
+- src/ui/screens/run_list/tests.rs (RL-002, RL-003, RL-005, RL-012, RL-013)
 - src/ui/tests/run_list.rs (RL-004, RL-007, RL-012)
 
 ### Code
@@ -54,11 +54,9 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 ## Key Findings
 
-1. **Long errors are cut off** — the RL-012/RL-013 error line is one row, so a long cause chain is truncated rather than wrapped.
-2. **"1 runs"** — the table title does not singularize.
-3. **Reload on re-open** — pressing `2` while on Run List reloads and moves the selection to the top.
+1. **Reload on re-open** — pressing `2` while on Run List reloads and moves the selection to the top.
 
 ## Work Required
 
 ### Nice to Have
-1. Wrap long error messages; singular "1 run"; keep the selection when `2` is pressed on Run List.
+1. Keep the selection when `2` is pressed on Run List.

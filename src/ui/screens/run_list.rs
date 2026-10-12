@@ -4,14 +4,17 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::Line,
-    widgets::{Block, Borders, Cell, Paragraph, Row, Table},
+    widgets::{Block, Borders, Cell, Paragraph, Row, Table, Wrap},
     Frame,
 };
 
 // @spec RL-002, RL-003, RL-004, RL-005, RL-007, RL-012, RL-013
 pub fn render(f: &mut Frame, area: Rect, state: &mut RunListState) {
-    // Split area for an optional error line, the table and hints
-    let error_rows = if state.error_message.is_some() { 1 } else { 0 };
+    // Split area for an optional error (wrapped to fit), the table and hints
+    let error_rows = state
+        .error_message
+        .as_deref()
+        .map_or(0, |e| wrapped_height(e, area.width));
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -24,7 +27,9 @@ pub fn render(f: &mut Frame, area: Rect, state: &mut RunListState) {
 
     if let Some(ref error) = state.error_message {
         f.render_widget(
-            Paragraph::new(error.as_str()).style(theme::error_style()),
+            Paragraph::new(error.as_str())
+                .style(theme::error_style())
+                .wrap(Wrap { trim: false }),
             error_area,
         );
     }
@@ -92,7 +97,7 @@ pub fn render(f: &mut Frame, area: Rect, state: &mut RunListState) {
     .block(
         Block::default()
             .borders(Borders::ALL)
-            .title(format!("Run List ({} runs)", state.runs.len())),
+            .title(format!("Run List ({})", run_count(state.runs.len()))),
     );
 
     // The persisted TableState scrolls just enough to keep the selection in view.
@@ -115,6 +120,35 @@ fn render_hints(f: &mut Frame, area: Rect) {
     .block(Block::default().borders(Borders::ALL).title("Actions"));
 
     f.render_widget(hints, area);
+}
+
+fn run_count(n: usize) -> String {
+    if n == 1 {
+        "1 run".to_string()
+    } else {
+        format!("{n} runs")
+    }
+}
+
+/// Rows `text` needs when word-wrapped to `width` columns (long words break).
+fn wrapped_height(text: &str, width: u16) -> u16 {
+    let width = usize::from(width.max(1));
+    let (mut lines, mut col) = (1u16, 0usize);
+    for word in text.split(' ') {
+        let len = word.chars().count();
+        let needed = if col == 0 { len } else { col + 1 + len };
+        if needed <= width {
+            col = needed;
+        } else {
+            lines += 1;
+            col = len;
+            while col > width {
+                lines += 1;
+                col -= width;
+            }
+        }
+    }
+    lines
 }
 
 #[cfg(test)]

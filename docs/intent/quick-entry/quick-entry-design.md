@@ -25,7 +25,7 @@ Code: `QuickEntryState` and `InputField` in `src/app.rs`; `handle_quick_entry_in
 | `clear()` | Same reset as `new()` with a fresh clock reading; also leaves edit mode. Triggered by Esc Esc on this screen (`NAV`). |
 | `load_run(&Run)` | Fills fields from a stored run (time as `HH:MM:SS`, distance via `f64::to_string`, note or empty), focus Distance, clears messages, sets `editing_run_id`. Triggered by `e` on Run List (`RL`). |
 
-The prefill is a snapshot taken at startup, on clear, and (for Time) after each new run is saved — it does not track the clock while the screen sits open.
+Date **follows the clock until edited** (`QE-025`): `QuickEntryState` tracks `date_edited`, set when the user types or deletes in the Date field or when a run is loaded for editing, and cleared by `new()` and `clear()`. While it is false, `follow_clock(today)` — called by the event loop before every frame — rewrites Date to today, so a form left open past midnight logs to the new day. Time is a snapshot taken at startup, on clear, and after each new run is saved (`QE-016`); it does not tick, because a run's start time is often typed after the run.
 
 ## Text Capture and Focus
 
@@ -107,6 +107,7 @@ Run logged successfully!              ← red error takes precedence over green 
 | Editing UI | Reuse the Quick Entry form in an edit mode | Separate edit dialog; inline editing in Run List | One form keeps one set of parsing and validation rules for new and edited runs. |
 | Accepted date/time formats | Several ISO and US formats, including 12-hour AM/PM | Single strict format | Tolerates the formats a user naturally types when backfilling. |
 | Future runs | Reject a date and time after now | Check the date only; allow and exclude from analytics | A run records something that already happened; refusing it at entry keeps every downstream measure honest, and checking the time too stops a run being logged before it is finished. |
+| Date while the form sits open | Follows the clock until the user edits it | Snapshot at startup; correct the date at submit | A form left open past midnight must log to the new day, and the screen must show the date that will be saved. |
 | Time after a new run is saved | Always refresh to the current clock, even after a hand-typed time | Refresh only when Time still holds the prefill | Each entry starts at "now"; a kept hand-typed time would duplicate the run just saved and be rejected by Storage. |
 | Leaving mid-edit | Cancel on any switch to Run List or Analytics, in Navigation's single screen-switch function; Help keeps the edit | Cancel on any departure from Quick Entry; cancel in each navigation key branch | Checking Help must not cost the user their edit, while visiting another screen is a clear sign the edit was abandoned; one function covers every route. |
 | Feedback on a cancelled edit | The title returns to "Quick Entry - Log Your Run" | An "Edit cancelled" message | The title change already shows the form is no longer editing; a message would be noise. |
@@ -121,10 +122,9 @@ Run logged successfully!              ← red error takes precedence over green 
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **Date prefill across midnight.** The Date field is captured at startup and on clear, so with the app left open past midnight a new run is logged to the previous day unless the user edits Date. Should Date also refresh after an insert or when the screen is shown?
-2. **Whitespace-only Distance** passes the empty check (which runs before trimming) and reports "Invalid distance…" instead of "Distance is required".
-3. **Modifier keys** other than Ctrl+Q/Ctrl+C insert their base character into the field.
-4. **Labels and error text undersell accepted formats** — "Time (HH:MM:SS)" and the error messages omit HH:MM, AM/PM and the US date forms.
+1. **Whitespace-only Distance** passes the empty check (which runs before trimming) and reports "Invalid distance…" instead of "Distance is required".
+2. **Modifier keys** other than Ctrl+Q/Ctrl+C insert their base character into the field.
+3. **Labels and error text undersell accepted formats** — "Time (HH:MM:SS)" and the error messages omit HH:MM, AM/PM and the US date forms.
 
 ## References
 

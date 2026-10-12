@@ -25,12 +25,8 @@ pub(super) fn handle_quick_entry_input(app: &mut App, key: KeyEvent, conn: &Conn
             state.prev_field();
         }
         KeyCode::Enter => submit(app, conn),
-        KeyCode::Char(c) => {
-            state.current_input_mut().push(c);
-        }
-        KeyCode::Backspace => {
-            state.current_input_mut().pop();
-        }
+        KeyCode::Char(c) => state.type_char(c),
+        KeyCode::Backspace => state.delete_char(),
         _ => {}
     }
 }

@@ -4,7 +4,7 @@ The daily-goal measures (current/longest streak, year goal), volume statistics, 
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then AN-011 (display rounding) was changed and AN-009 reworded. All 16 specs implemented and tested.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then AN-011 and AN-012 were changed and AN-009 reworded. All 16 specs implemented and tested.
 
 ## References
 
@@ -20,7 +20,7 @@ The daily-goal measures (current/longest streak, year goal), volume statistics, 
 ### Tests
 - src/input/tests/errors.rs (AN-014)
 - src/logic/streak/tests.rs (AN-001, AN-002, AN-003, AN-004, AN-005, AN-006, AN-007, AN-011, AN-013, AN-015)
-- src/ui/screens/analytics/tests.rs (AN-008, AN-009, AN-010)
+- src/ui/screens/analytics/tests.rs (AN-008, AN-009, AN-010, AN-012)
 - src/ui/tests/analytics.rs (AN-001, AN-011, AN-012, AN-013, AN-014, AN-016)
 
 ### Code
@@ -55,10 +55,10 @@ The daily-goal measures (current/longest streak, year goal), volume statistics, 
 ## Key Findings
 
 1. **Tiny panels** — when the chart panel is under 5 rows tall, no day lines show, not even today.
-2. **Monthly thresholds use the raw total** — 49.96 mi displays as "50.0 mi" in yellow.
-3. **Stale "today"** when the screen stays open past midnight; rolling-period labels read as calendar periods.
+2. **Stale "today"** — analytics are computed when the screen opens; leaving it open past midnight shows yesterday's view until reopened.
+3. **Labels** — "This Week"/"This Month" are rolling 7/30-day windows.
 
 ## Work Required
 
 ### Nice to Have
-1. Judge monthly colors on the displayed (one-decimal) total; clarify rolling-period labels.
+1. Clarify rolling-period labels; recompute when the date changes while Analytics is open.

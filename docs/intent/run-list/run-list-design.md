@@ -47,7 +47,7 @@ After a successful delete, the handler remembers the deleted row's position, rel
 
 ## Display
 
-`src/ui/screens/run_list.rs` splits the area into an optional 1-row error line (bold red, shown only while `error_message` is set), a table (min 10 rows) and a 3-row "Actions" hint panel:
+`src/ui/screens/run_list.rs` splits the area into an optional error area (bold red, shown only while `error_message` is set, as tall as the message needs when wrapped to the screen width), a table (min 10 rows) and a 3-row "Actions" hint panel:
 
 ```
 ┌Run List (42 runs)───────────────────────────────────────┐
@@ -61,7 +61,7 @@ After a successful delete, the handler remembers the deleted row's position, rel
 └─────────────────────────────────────────────────────────┘
 ```
 
-Columns are fixed at 12/10/15 characters with Note taking the rest (min 20). Distance is shown to two decimals. With no runs, the table is replaced by "No runs logged yet. Press Esc → 1 to add a run." and the hint panel still shows.
+The title counts runs — "Run List (1 run)", "Run List (42 runs)". Columns are fixed at 12/10/15 characters with Note taking the rest (min 20). Distance is shown to two decimals. With no runs, the table is replaced by "No runs logged yet. Press Esc → 1 to add a run." and the hint panel still shows.
 
 ## Decisions & Alternatives
 

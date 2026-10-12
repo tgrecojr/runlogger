@@ -13,6 +13,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 - [x] **QE-005**: The Quick Entry screen shall display the Date, Time, Distance and Note fields labeled "Date (YYYY-MM-DD)", "Time (HH:MM:SS)", "Distance (miles)" and "Note (optional)", and shall show the focused field with a yellow border, bold yellow text and a trailing `_` cursor.
 - [x] **QE-006**: While Quick Entry is in edit mode, the system shall title the screen "Edit Run"; otherwise it shall title the screen "Quick Entry - Log Your Run".
 - [x] **QE-007**: When the Quick Entry form is cleared (Esc Esc on Quick Entry), the system shall reset Date and Time to the current local date and time, empty Distance and Note, focus Distance, remove any message, and leave edit mode.
+- [x] **QE-025**: While the Quick Entry Date field has not been edited since the form was prefilled or cleared, the system shall keep it showing today's local date, updating it when the date changes even while no key is pressed; once the user edits the Date field, or a run is loaded for editing, the system shall keep the Date as it is until the form is cleared.
 
 ## Parsing and Validation
 

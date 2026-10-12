@@ -80,9 +80,9 @@ fn table_is_titled_with_run_count() {
     let screen = buffer_text(&draw(&mut state));
     assert!(screen.contains("Run List (3 runs)"), "{screen}");
 
-    state.runs.truncate(1);
+    state.runs.truncate(2);
     let screen = buffer_text(&draw(&mut state));
-    assert!(screen.contains("Run List (1 runs)"), "{screen}");
+    assert!(screen.contains("Run List (2 runs)"), "{screen}");
 }
 
 // @spec RL-002
@@ -172,4 +172,31 @@ fn actions_panel_is_shown_when_the_history_is_empty() {
     let (_, hints_y) = locate(&buf, HINTS);
     assert!(actions_y > empty_y);
     assert_eq!(hints_y, actions_y + 1);
+}
+
+// @spec RL-002
+#[test]
+fn title_uses_singular_for_one_run() {
+    let mut state = RunListState::new();
+    state.runs = vec![run(1, (2026, 10, 1), (7, 0, 0), 2.0, None)];
+    let screen = buffer_text(&draw(&mut state));
+    assert!(screen.contains("Run List (1 run)"), "{screen}");
+    assert!(!screen.contains("(1 runs)"), "{screen}");
+}
+
+// @spec RL-012, RL-013
+#[test]
+fn long_error_wraps_and_is_shown_in_full() {
+    let mut state = RunListState::new();
+    let message = format!(
+        "Could not load runs: {} END-OF-MESSAGE",
+        "Run 12 has an unreadable date: \"2026-13-45\" ".repeat(4)
+    );
+    assert!(
+        message.len() > 100,
+        "message must be longer than the 100-column screen"
+    );
+    state.error_message = Some(message);
+    let screen = buffer_text(&draw(&mut state));
+    assert!(screen.contains("END-OF-MESSAGE"), "{screen}");
 }
