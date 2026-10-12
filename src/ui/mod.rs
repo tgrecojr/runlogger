@@ -28,8 +28,14 @@ pub fn render(f: &mut Frame, app: &mut App) {
     render_footer(f, chunks[2], app.screen);
 }
 
-// @spec NAV-013
+// @spec NAV-013, NAV-016
 fn render_header(f: &mut Frame, area: Rect, current_screen: Screen) {
+    // On Quick Entry single keys type text, so only the Esc form is true there.
+    let prefix = if current_screen == Screen::QuickEntry {
+        "Esc "
+    } else {
+        ""
+    };
     let tabs = [
         ("1", "Quick Entry", current_screen == Screen::QuickEntry),
         ("2", "Run List", current_screen == Screen::RunList),
@@ -49,7 +55,7 @@ fn render_header(f: &mut Frame, area: Rect, current_screen: Screen) {
             };
 
             vec![
-                Span::styled(format!("[{}]", key), style),
+                Span::styled(format!("[{prefix}{key}]"), style),
                 Span::raw(" "),
                 Span::styled(*label, style),
                 Span::raw("  "),
@@ -76,11 +82,11 @@ fn render_screen(f: &mut Frame, area: Rect, app: &mut App) {
 fn render_footer(f: &mut Frame, area: Rect, current_screen: Screen) {
     let footer_text = match current_screen {
         Screen::QuickEntry => {
-            "[Tab] Next  [Shift+Tab] Prev  [Enter] Submit  [Esc] Clear  [h] Help  [Ctrl+Q] Quit"
+            "[Tab] Field  [Enter] Save  [Esc Esc] Clear  [Esc 1-3/h] Screen/Help  [^Q] Quit"
         }
-        Screen::RunList => "[↑↓] Navigate  [1-3] Switch screen  [h] Help  [q] Quit",
-        Screen::Analytics => "[1-3] Switch screen  [h] Help  [q] Quit",
-        Screen::Help => "[1-3] Switch screen  [q] Quit",
+        Screen::RunList => "[↑↓] Navigate  [e] Edit  [d] Delete  [1-3] Screen  [h] Help  [q] Quit",
+        Screen::Analytics => "[1-3] Screen  [h] Help  [q] Quit",
+        Screen::Help => "[1-3] Screen  [q] Quit",
     };
 
     let footer = Paragraph::new(footer_text)

@@ -36,16 +36,14 @@ The database is opened before the terminal enters raw mode, so startup failures 
 | # | Condition | Effect |
 |---|---|---|
 | 1 | Ctrl+Q or Ctrl+C | Quit (any screen). |
-| 2 | Esc prefix armed | Disarm, then: `1` → Quick Entry; `2` → load runs, Run List; `3` → load analytics, Analytics; `h` or `?` → Help; Esc → clear Quick Entry if it is shown; anything else → ignored. |
+| 2 | Esc prefix armed (`handle_esc_command`) | Disarm, then: `1` → Quick Entry; `2` → load runs, Run List; `3` → load analytics, Analytics; `h` or `?` → Help; Esc → clear Quick Entry if it is shown; anything else → ignored. |
 | 3 | Esc | Arm the Esc prefix (no visible indicator). |
 | 4 | `q`, not on Quick Entry | Quit. |
 | 5 | On Quick Entry | Hand the key to Quick Entry (`QE-003`). |
-| 6 | `1` / `2` / `3` / `h` or `?` | Switch to Quick Entry / Run List (with load) / Analytics (with load) / Help. |
+| 6 | `1` / `2` / `3` / `h` or `?` (`handle_direct_keys`) | Switch to Quick Entry / Run List (with load) / Analytics (with load) / Help. |
 | 7 | On Run List | Hand the key to Run List (`RL-006`, `RL-008`, `RL-009`). |
 
-Esc→`h` / Esc→`?` makes Help reachable from every screen, including Quick Entry (`NAV-018`).
-
-**Divergence (Esc→Help).** The code has no `h`/`?` case after Esc (`handle_key_event`), so Help cannot be reached from Quick Entry without first switching elsewhere.
+Esc→`h` / Esc→`?` makes Help reachable from every screen, including Quick Entry (`NAV-018`). `handle_key_event` delegates each rule group to a small function — quit keys, the Esc command, direct screen keys — to stay within the 50-line function limit.
 
 Every screen change goes through `App::switch_to_screen`. When the target is Run List or Analytics and Quick Entry is in edit mode, it resets the Quick Entry form, cancelling the edit (`QE-023`) — whether the switch starts on Quick Entry or on Help. Switching to Help or to Quick Entry (Run List's `e`), and any switch while not editing, leave the form alone.
 
@@ -55,20 +53,18 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 
 `ui::render` (`src/ui/mod.rs`) splits the frame into a 3-row header, the active screen, and a 3-row footer.
 
-- **Header** — bordered "Run Logger" block with `[1] Quick Entry  [2] Run List  [3] Analytics  [h] Help`; the active tab is bold yellow, others gray.
-- **Footer** — one dark-gray hint line per screen (`src/ui/mod.rs:72-87`):
+- **Header** — bordered "Run Logger" block listing the four screens with the key that opens each; the active tab is bold yellow, others gray. On Quick Entry, where single keys type text, the tabs show the Esc form — `[Esc 1] Quick Entry  [Esc 2] Run List  [Esc 3] Analytics  [Esc h] Help` — and on every other screen the direct form `[1] Quick Entry  [2] Run List  [3] Analytics  [h] Help` (`NAV-013`).
+- **Footer** — one dark-gray hint line per screen (`render_footer`). Every hint must be true on the screen it is shown for (`NAV-016`), and every line fits the 78 columns inside the footer border on an 80-column terminal (`NAV-014`); the Help screen carries the longer explanations.
 
-| Screen | Footer text today | Problem |
-|---|---|---|
-| Quick Entry | `[Tab] Next [Shift+Tab] Prev [Enter] Submit [Esc] Clear [h] Help [Ctrl+Q] Quit` | `h` types a letter; Esc alone only arms the prefix (clear is Esc Esc) |
-| Run List | `[↑↓] Navigate [1-3] Switch screen [h] Help [q] Quit` | omits `e`/`d` (shown in Run List's own Actions panel) |
-| Analytics | `[1-3] Switch screen [h] Help [q] Quit` | — |
-| Help | `[1-3] Switch screen [q] Quit` | — |
+| Screen | Footer |
+|---|---|
+| Quick Entry | `[Tab] Field  [Enter] Save  [Esc Esc] Clear  [Esc 1-3/h] Screen/Help  [^Q] Quit` |
+| Run List | `[↑↓] Navigate  [e] Edit  [d] Delete  [1-3] Screen  [h] Help  [q] Quit` |
+| Analytics | `[1-3] Screen  [h] Help  [q] Quit` |
+| Help | `[1-3] Screen  [q] Quit` |
 
-- **Help screen** (`src/ui/screens/help.rs`) — static text: Navigation, Quick Entry Screen, Run List Screen, Your Goal, Tips, Data Location. It states that `h`/`?` work "from any screen" (not true on Quick Entry) and hard-codes the macOS database path.
+- **Help screen** (`src/ui/screens/help.rs`) — static reference in sections: Navigation (Esc commands work everywhere; direct `1`–`3`, `h`, `?`, `q` everywhere except Quick Entry, where keys type text), Quick Entry (fields, save, clear, Time refreshing after a save, no future runs, leaving mid-edit cancels the edit), Run List (select, edit, delete without confirmation), Your Goal (a mile a day, runs on one day add up, today counts once its mile is logged), and Data Location.
 - **Theme** (`src/ui/theme.rs`) — focused/unfocused input, error, success, stat, goal-met and goal-not-met styles. Several screens also set colors inline rather than through the theme.
-
-**Divergence (hints).** Key hints in the footer and Help screen do not match key behavior on Quick Entry (`NAV-016`). The README repeats these.
 
 ## Decisions & Alternatives
 
@@ -83,6 +79,8 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 | Panic safety | Panic hook restores the terminal | Rely on normal exit | A crash never leaves the user's shell in raw mode. |
 | Event loop | Single-threaded, 100 ms poll, redraw every iteration | Async runtime; redraw only on events | Simple and responsive enough for a keyboard-driven form. |
 | Failure policy | Screen-level errors are shown on that screen; only quit commands and terminal failures end the app | Exit on any error | A storage problem must not cost the user the rest of the app. |
+| Header keys on Quick Entry | Show the Esc form (`[Esc 1]` …) on Quick Entry, the direct form elsewhere | Same labels everywhere; treat the header as a screen map only | The header is read as key hints; on Quick Entry the direct keys type text, so only the Esc form is true there. |
+| Footer length | Compact hints that fit an 80-column terminal; the Help screen explains in full | Descriptive hints that clip below ~105 columns | A clipped hint is a hidden hint; the footer is a reminder, Help is the reference. |
 | Where key handling lives | `src/input.rs`, separate from lifecycle in `src/main.rs` | Keep everything in `main.rs`; a library crate with `tests/` | Key routing and screen actions can be unit-tested against an in-memory database without a terminal, and each file stays within the 300-line limit. |
 
 ## Open Questions & Future Decisions
@@ -90,15 +88,14 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 ### Deferred
 1. **No Esc-prefix indicator.** After Esc nothing on screen shows that the next key is a command.
 2. **Hard-coded data path in Help.** Shows the macOS path even where `dirs::data_dir()` differs.
-3. **Function size.** `handle_key_event` (~82 lines) exceeds the 50-line limit.
-4. **Unused stubs.** `src/ui/components/{chart,input,stats}.rs` contain only comments.
-5. **Inline colors.** Header, Run List and Analytics set colors directly instead of using `theme.rs`.
+3. **Unused stubs.** `src/ui/components/{chart,input,stats}.rs` contain only comments.
+4. **Inline colors.** Header, Run List and Analytics set colors directly instead of using `theme.rs`.
 
 ## References
 
 - Code: `src/main.rs`, `src/input/mod.rs`, `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`, `src/ui/components/*`
 - Specs: `docs/intent/navigation/navigation-specs.md`
-- Tests: `src/input/tests.rs`
+- Tests: `src/input/tests.rs`, `src/ui/tests.rs`
 - Test support: `src/test_support.rs` (in-memory database, raw rows, write-blocking triggers, key constructors)
 - Triggers: Storage startup (`STORE-001`), Run List load (`RL-001`), Analytics load (`AN-008`), Quick Entry clear (`QE-007`) and edit cancel (`QE-023`)
 - External: `crossterm` 0.29, `ratatui` 0.30, `anyhow` 1

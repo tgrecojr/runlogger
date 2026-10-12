@@ -2,7 +2,7 @@
 
 Design: `docs/intent/run-list/run-list-design.md` · Prefix: `RL`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/input/tests.rs` (RL-011, RL-012, RL-013), `src/ui/tests.rs` (RL-004, RL-007, RL-012).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/input/tests.rs` (RL-010, RL-011, RL-012, RL-013), `src/ui/tests.rs` (RL-004, RL-007, RL-012).
 
 ## Loading
 
@@ -24,7 +24,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 
 - [x] **RL-008**: While the Run List screen shows at least one run, when the user presses `e`, the system shall hand the selected run to Quick Entry for editing and switch to the Quick Entry screen.
 - [x] **RL-009**: While the Run List screen shows at least one run, when the user presses `d`, the system shall delete the selected run from storage immediately, without confirmation, and reload the run history.
-- [ ] **RL-010**: When the Run List reloads after a delete, the system shall keep the selection at the same row position (now holding the run that followed the deleted one), or on the last run if the deleted run was the last row.
+- [x] **RL-010**: When the Run List reloads after a delete, the system shall keep the selection at the same row position (now holding the run that followed the deleted one), or on the last run if the deleted run was the last row.
 - [x] **RL-011**: When the Run List screen is shown after Quick Entry saves an edit, the system shall select the edited run.
 
 ## Errors

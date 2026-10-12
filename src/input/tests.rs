@@ -278,3 +278,92 @@ fn saving_an_edit_returns_to_run_list_with_the_edited_run_selected() {
     assert_eq!(selected.id, Some(edited));
     assert_eq!(selected.distance_miles, 4.0);
 }
+
+fn three_runs(conn: &Connection) -> [i64; 3] {
+    [
+        insert_raw(conn, "2026-10-03", "07:00:00", 3.0),
+        insert_raw(conn, "2026-10-02", "07:00:00", 2.0),
+        insert_raw(conn, "2026-10-01", "07:00:00", 1.0),
+    ]
+}
+
+fn selected_id(app: &App) -> Option<i64> {
+    let state = &app.run_list_state;
+    state.runs.get(state.selected_index).and_then(|r| r.id)
+}
+
+// @spec RL-010
+#[test]
+fn delete_keeps_the_selection_at_the_same_row() {
+    let conn = memory_db();
+    let [_, middle, oldest] = three_runs(&conn);
+    let mut app = App::new();
+    press(
+        &mut app,
+        &conn,
+        &[key(KeyCode::Esc), ch('2'), key(KeyCode::Down)],
+    );
+    assert_eq!(selected_id(&app), Some(middle));
+    press(&mut app, &conn, &[ch('d')]);
+
+    assert_eq!(app.run_list_state.selected_index, 1);
+    assert_eq!(selected_id(&app), Some(oldest));
+}
+
+// @spec RL-010
+#[test]
+fn deleting_the_last_row_selects_the_new_last_row() {
+    let conn = memory_db();
+    let [_, middle, _] = three_runs(&conn);
+    let mut app = App::new();
+    press(
+        &mut app,
+        &conn,
+        &[
+            key(KeyCode::Esc),
+            ch('2'),
+            key(KeyCode::Down),
+            key(KeyCode::Down),
+            ch('d'),
+        ],
+    );
+
+    assert_eq!(app.run_list_state.selected_index, 1);
+    assert_eq!(selected_id(&app), Some(middle));
+}
+
+// @spec NAV-018
+#[test]
+fn esc_then_h_or_question_mark_opens_help_from_any_screen() {
+    let conn = memory_db();
+    for help_key in ['h', '?'] {
+        for start in [Screen::QuickEntry, Screen::RunList, Screen::Analytics] {
+            let mut app = App::new();
+            app.switch_to_screen(start);
+            press(&mut app, &conn, &[key(KeyCode::Esc), ch(help_key)]);
+            assert_eq!(app.screen, Screen::Help, "Esc {help_key} from {start:?}");
+        }
+    }
+}
+
+// @spec NAV-018, QE-023
+#[test]
+fn esc_h_mid_edit_keeps_the_edit() {
+    let conn = memory_db();
+    insert_raw(&conn, "2026-10-01", "07:00:00", 2.0);
+    let mut app = App::new();
+    press(
+        &mut app,
+        &conn,
+        &[
+            key(KeyCode::Esc),
+            ch('2'),
+            ch('e'),
+            key(KeyCode::Esc),
+            ch('h'),
+        ],
+    );
+    assert_eq!(app.screen, Screen::Help);
+    assert!(qe(&app).is_editing());
+    assert!(!qe(&app).distance.is_empty());
+}

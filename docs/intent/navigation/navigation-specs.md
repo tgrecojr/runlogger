@@ -2,7 +2,7 @@
 
 Design: `docs/intent/navigation/navigation-design.md` · Prefix: `NAV`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/input/tests.rs` (NAV-017).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/input/tests.rs` (NAV-017, NAV-018), `src/ui/tests.rs` (NAV-013, NAV-014, NAV-016).
 
 ## Lifecycle
 
@@ -22,7 +22,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 - [x] **NAV-008**: When the user presses `1`, `2` or `3` as the key after Esc, the system shall switch to the Quick Entry, Run List or Analytics screen respectively, loading the Run List or Analytics data on the switch.
 - [x] **NAV-009**: When the user presses Esc as the key after Esc while the Quick Entry screen is shown, the system shall clear the Quick Entry form.
 - [x] **NAV-010**: When the user presses a key other than `1`, `2`, `3`, Esc, `h` or `?` as the key after Esc, the system shall ignore that key and stay on the current screen.
-- [ ] **NAV-018**: When the user presses `h` or `?` as the key after Esc, on any screen, the system shall show the Help screen.
+- [x] **NAV-018**: When the user presses `h` or `?` as the key after Esc, on any screen, the system shall show the Help screen.
 
 ## Direct Keys
 
@@ -31,10 +31,10 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 
 ## Shared Chrome
 
-- [x] **NAV-013**: The system shall show a header titled "Run Logger" listing `[1] Quick Entry`, `[2] Run List`, `[3] Analytics` and `[h] Help`, with the current screen's tab in bold yellow and the others in gray.
-- [x] **NAV-014**: The system shall show a footer with a line of key hints specific to the current screen.
+- [x] **NAV-013**: The system shall show a header titled "Run Logger" listing the Quick Entry, Run List, Analytics and Help screens with the key that opens each — `[Esc 1]`, `[Esc 2]`, `[Esc 3]` and `[Esc h]` while the Quick Entry screen is shown, and `[1]`, `[2]`, `[3]` and `[h]` on every other screen — with the current screen's tab in bold yellow and the others in gray.
+- [x] **NAV-014**: The system shall show a footer with a line of key hints specific to the current screen, short enough to show in full within the footer border on an 80-column terminal.
 - [x] **NAV-015**: The Help screen shall describe navigation keys, Quick Entry keys, Run List keys, the 1-mile daily goal, usage tips, and the run database location.
-- [ ] **NAV-016**: Every key hint shown in the footer and on the Help screen shall describe what that key actually does on the screen it is shown for.
+- [x] **NAV-016**: Every key hint shown in the header, the footer and on the Help screen shall describe what that key actually does on the screen it is shown for.
 
 ## Failures
 
