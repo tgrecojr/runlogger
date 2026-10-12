@@ -1,5 +1,8 @@
 use chrono::NaiveDate;
 
+/// The year goal: this many goal-met days per calendar year.
+pub const YEAR_GOAL_DAYS: i32 = 365;
+
 #[derive(Debug, Clone)]
 pub struct Analytics {
     pub current_streak: u32,
@@ -17,6 +20,8 @@ pub struct Analytics {
     pub average_distance_this_month: f64,
     pub average_distance_this_year: f64,
     pub monthly_breakdown: Vec<MonthlyData>,
+    /// Whether today's runs already meet the daily goal.
+    pub today_goal_met: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -47,12 +52,13 @@ impl Analytics {
             runs_this_month: 0,
             runs_this_year: 0,
             recent_trend: Vec::new(),
-            days_remaining_to_year_goal: 365,
+            days_remaining_to_year_goal: YEAR_GOAL_DAYS,
             year_goal_completion_percentage: 0.0,
             average_distance_this_week: 0.0,
             average_distance_this_month: 0.0,
             average_distance_this_year: 0.0,
             monthly_breakdown: Vec::new(),
+            today_goal_met: false,
         }
     }
 }

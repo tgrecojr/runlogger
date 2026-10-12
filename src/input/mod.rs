@@ -119,7 +119,8 @@ pub(super) fn load_analytics(app: &mut App, conn: &Connection) {
     let state = &mut app.analytics_state;
     match db::queries::get_all_runs(conn) {
         Ok(runs) => {
-            state.analytics = logic::streak::calculate_analytics(&runs);
+            state.analytics =
+                logic::streak::calculate_analytics(&runs, chrono::Local::now().date_naive());
             state.error_message = None;
         }
         Err(e) => {
