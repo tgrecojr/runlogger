@@ -9,7 +9,7 @@ use ratatui::{
 };
 
 // @spec RL-002, RL-003, RL-004, RL-005, RL-007, RL-012, RL-013
-pub fn render(f: &mut Frame, area: Rect, state: &RunListState) {
+pub fn render(f: &mut Frame, area: Rect, state: &mut RunListState) {
     // Split area for an optional error line, the table and hints
     let error_rows = if state.error_message.is_some() { 1 } else { 0 };
     let chunks = Layout::default()
@@ -95,7 +95,9 @@ pub fn render(f: &mut Frame, area: Rect, state: &RunListState) {
             .title(format!("Run List ({} runs)", state.runs.len())),
     );
 
-    f.render_widget(table, chunks[0]);
+    // The persisted TableState scrolls just enough to keep the selection in view.
+    state.table_state.select(Some(state.selected_index));
+    f.render_stateful_widget(table, chunks[0], &mut state.table_state);
     render_hints(f, chunks[1]);
 }
 

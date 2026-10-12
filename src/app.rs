@@ -2,6 +2,7 @@ use crate::logic::validation;
 use crate::models::analytics::Analytics;
 use crate::models::run::Run;
 use chrono::Local;
+use ratatui::widgets::TableState;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Screen {
@@ -106,16 +107,25 @@ impl QuickEntryState {
 pub struct RunListState {
     pub runs: Vec<Run>,
     pub selected_index: usize,
-    pub scroll_offset: usize,
+    /// Scroll position carried between frames; the renderer keeps the selection in view.
+    pub table_state: TableState,
     pub error_message: Option<String>,
 }
 
 impl RunListState {
+    /// Selects the run with this id, if it is in the list.
+    // @spec RL-011
+    pub fn select_run(&mut self, id: i64) {
+        if let Some(index) = self.runs.iter().position(|run| run.id == Some(id)) {
+            self.selected_index = index;
+        }
+    }
+
     pub fn new() -> Self {
         Self {
             runs: Vec::new(),
             selected_index: 0,
-            scroll_offset: 0,
+            table_state: TableState::default(),
             error_message: None,
         }
     }
@@ -156,7 +166,14 @@ impl App {
         }
     }
 
+    /// Every screen change goes through here. Moving to Run List or Analytics
+    /// abandons an edit in progress; Help is a quick look and keeps it.
+    // @spec QE-023
     pub fn switch_to_screen(&mut self, screen: Screen) {
+        let leaves_edit = matches!(screen, Screen::RunList | Screen::Analytics);
+        if leaves_edit && self.quick_entry_state.is_editing() {
+            self.quick_entry_state.clear();
+        }
         self.screen = screen;
     }
 

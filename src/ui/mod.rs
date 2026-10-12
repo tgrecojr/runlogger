@@ -13,7 +13,7 @@ use ratatui::{
     Frame,
 };
 
-pub fn render(f: &mut Frame, app: &App) {
+pub fn render(f: &mut Frame, app: &mut App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -63,10 +63,10 @@ fn render_header(f: &mut Frame, area: Rect, current_screen: Screen) {
     f.render_widget(header, area);
 }
 
-fn render_screen(f: &mut Frame, area: Rect, app: &App) {
+fn render_screen(f: &mut Frame, area: Rect, app: &mut App) {
     match app.screen {
         Screen::QuickEntry => screens::quick_entry::render(f, area, &app.quick_entry_state),
-        Screen::RunList => screens::run_list::render(f, area, &app.run_list_state),
+        Screen::RunList => screens::run_list::render(f, area, &mut app.run_list_state),
         Screen::Analytics => screens::analytics::render(f, area, &app.analytics_state),
         Screen::Help => screens::help::render(f, area),
     }

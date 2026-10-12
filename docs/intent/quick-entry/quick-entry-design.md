@@ -25,7 +25,7 @@ Code: `QuickEntryState` and `InputField` in `src/app.rs`; `handle_quick_entry_in
 | `clear()` | Same reset as `new()` with a fresh clock reading; also leaves edit mode. Triggered by Esc Esc on this screen (`NAV`). |
 | `load_run(&Run)` | Fills fields from a stored run (time as `HH:MM:SS`, distance via `f64::to_string`, note or empty), focus Distance, clears messages, sets `editing_run_id`. Triggered by `e` on Run List (`RL`). |
 
-The prefill is a snapshot taken at startup or on clear — it does not track the clock while the screen sits open.
+The prefill is a snapshot taken at startup, on clear, and (for Time) after each new run is saved — it does not track the clock while the screen sits open.
 
 ## Text Capture and Focus
 
@@ -45,9 +45,7 @@ On Enter, both messages are cleared, then fields are parsed in order Date → Ti
 | Time (`parse_time`) | `%H:%M:%S`, `%H:%M`, `%I:%M %p`, `%I:%M:%S %p` | current clock time, truncated to whole seconds | "Invalid time format. Use HH:MM or HH:MM:SS" |
 | Distance (`parse_distance`) | anything `f64::from_str` accepts after trimming | error | "Distance is required" / "Invalid distance. Enter a number (e.g., 3.5)" |
 
-A parsed Date after today's local date is rejected with "Date cannot be in the future" (`QE-024`); runs record what has happened, and a future-dated run would distort the streak and period statistics.
-
-**Divergence (future dates).** The code accepts any parseable date (`parse_date`).
+Once Date and Time have parsed, and before Distance is checked, the submission's date and time together must not be after the current local date and time (`QE-024`): a date after today is rejected with "Date cannot be in the future", and today's date with a later time with "Time cannot be in the future". Runs record what has happened; a future run would distort the streak and period statistics. The check is a pure function of the submission and the current date-time (`check_not_future` in `validation.rs`), so it can be tested at any fixed "now".
 
 `Run::new` then enforces the run rules: distance must be `> 0` ("Distance must be positive") and `≤ 200` ("Distance seems unrealistic (>200 miles)"). It stamps `created_at = Utc::now()`. An empty Note becomes `None`.
 
@@ -69,11 +67,9 @@ Enter ─▶ clear messages ─▶ parse Date ─▶ parse Time ─▶ parse Dis
 
 If the post-edit reload fails, the form stays reset, the switch to Run List still happens, and Run List shows the load error (`RL-012`); the edit itself has already been saved.
 
-**Divergence (after a new run).** The code keeps the Time field unchanged after an insert (`submit`), so a second run logged without retyping Time repeats the first run's date and start time and is rejected by Storage's uniqueness rule (`STORE-005`). The intended behavior refreshes Time to the current clock (`QE-016`).
+After the post-edit reload, Quick Entry asks Run List to select the run it just saved, by id (`RunListState::select_run`); Run List owns the selection and keeps it in view (`RL-011`, `RL-007`).
 
-**Divergence (after an edit).** The code resets the form and switches to Run List, but the reload resets Run List's selection to the top row, so the edited run is not shown selected (`QE-017`, with Run List owning the selection in `RL-011`).
-
-**Divergence (leaving mid-edit).** Nothing clears `editing_run_id` when the user switches screens (`handle_key_event` in `src/input/mod.rs`), so the next Enter on Quick Entry silently overwrites the run that was being edited. The intended behavior cancels the edit on leaving (`QE-023`).
+While in edit mode, switching to Run List or Analytics cancels the edit: the form resets as when cleared (`QE-023`). Help is a quick look — switching to Help keeps the edit, so the user can check a key and return with Esc→`1` — but a later switch from Help to Run List or Analytics still cancels it. The returning user sees the plain "Quick Entry - Log Your Run" title instead of "Edit Run", which is the feedback that the edit was dropped. The cancel happens in Navigation's single screen-switch function, so every route is covered. Leaving while *not* editing keeps whatever was typed, so a half-entered new run survives a look at Analytics.
 
 ## Display
 
@@ -103,7 +99,10 @@ Run logged successfully!              ← red error takes precedence over green 
 | Default screen and focus | Open on Quick Entry with Distance focused and date/time prefilled | Open on Run List or Analytics; focus Date | Logging today's run should take one number and Enter. |
 | Editing UI | Reuse the Quick Entry form in an edit mode | Separate edit dialog; inline editing in Run List | One form keeps one set of parsing and validation rules for new and edited runs. |
 | Accepted date/time formats | Several ISO and US formats, including 12-hour AM/PM | Single strict format | Tolerates the formats a user naturally types when backfilling. |
-| Future dates | Reject a Date after today | Allow and exclude from analytics | A run records something that already happened; refusing it at entry keeps every downstream measure honest. |
+| Future runs | Reject a date and time after now | Check the date only; allow and exclude from analytics | A run records something that already happened; refusing it at entry keeps every downstream measure honest, and checking the time too stops a run being logged before it is finished. |
+| Time after a new run is saved | Always refresh to the current clock, even after a hand-typed time | Refresh only when Time still holds the prefill | Each entry starts at "now"; a kept hand-typed time would duplicate the run just saved and be rejected by Storage. |
+| Leaving mid-edit | Cancel on any switch to Run List or Analytics, in Navigation's single screen-switch function; Help keeps the edit | Cancel on any departure from Quick Entry; cancel in each navigation key branch | Checking Help must not cost the user their edit, while visiting another screen is a clear sign the edit was abandoned; one function covers every route. |
+| Feedback on a cancelled edit | The title returns to "Quick Entry - Log Your Run" | An "Edit cancelled" message | The title change already shows the form is no longer editing; a message would be noise. |
 | Distance bounds | `0 < distance ≤ 200` miles | No upper bound; per-run pace check | Catches typos (an extra digit) while allowing any real run, ultramarathons included. |
 | Where run rules live | `Run::new` constructor | Only in the parse step | Any code that builds a `Run` gets the same invariants. |
 | After a new run is saved | Keep Date, refresh Time to the current clock in whole seconds, clear Distance and Note | Keep Date and Time; clear everything | Keeping Date lets several runs be backfilled for one day without retyping it; a fresh Time gives each run a distinct start time so Storage's uniqueness rule does not reject the next run. |

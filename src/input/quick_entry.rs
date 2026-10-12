@@ -1,8 +1,10 @@
 use super::load_runs;
 use crate::app::{App, InputField, QuickEntryState, Screen};
+use crate::logic::validation::{current_time, format_time};
 use crate::models::run::Run;
 use crate::{db, logic};
 use anyhow::Result;
+use chrono::Local;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use rusqlite::Connection;
 
@@ -55,6 +57,7 @@ fn submit(app: &mut App, conn: &Connection) {
                     // (Run List shows its own error if the reload fails).
                     state.clear();
                     load_runs(app, conn);
+                    app.run_list_state.select_run(id);
                     app.switch_to_screen(Screen::RunList);
                 }
                 Err(e) => state.error_message = Some(format!("Database error: {}", e)),
@@ -62,6 +65,8 @@ fn submit(app: &mut App, conn: &Connection) {
         }
         None => match db::queries::insert_run(conn, &run) {
             Ok(_) => {
+                // A fresh start time keeps the next run from duplicating this one.
+                state.time = format_time(&current_time());
                 state.distance.clear();
                 state.note.clear();
                 state.focused_field = InputField::Distance;
@@ -72,12 +77,13 @@ fn submit(app: &mut App, conn: &Connection) {
     }
 }
 
-/// Parses the form in the order Date, Time, Distance, then applies the run
-/// rules; the first failure is returned.
-// @spec QE-014
+/// Parses the form in the order Date, Time, not-in-the-future, Distance, then
+/// applies the run rules; the first failure is returned.
+// @spec QE-014, QE-024
 fn build_run(state: &QuickEntryState) -> Result<Run> {
     let date = logic::validation::parse_date(&state.date)?;
     let time = logic::validation::parse_time(&state.time)?;
+    logic::validation::check_not_future(date, time, Local::now().naive_local())?;
     let distance = logic::validation::parse_distance(&state.distance)?;
     let note = (!state.note.is_empty()).then(|| state.note.clone());
     Run::new(date, time, distance, note)

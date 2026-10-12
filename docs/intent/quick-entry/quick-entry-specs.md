@@ -2,7 +2,7 @@
 
 Design: `docs/intent/quick-entry/quick-entry-design.md` · Prefix: `QE`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/logic/validation.rs` (QE-010), `src/input/tests.rs` (QE-018).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/logic/validation.rs` (QE-010, QE-024), `src/input/tests.rs` (QE-014, QE-016, QE-017, QE-018, QE-023, QE-024).
 
 ## Form
 
@@ -22,14 +22,14 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 - [x] **QE-011**: If the Date field of a Quick Entry submission matches no accepted form, then the system shall reject it with "Invalid date format. Use YYYY-MM-DD"; if the Time field matches no accepted form, then the system shall reject it with "Invalid time format. Use HH:MM or HH:MM:SS".
 - [x] **QE-012**: If the Distance field of a Quick Entry submission is empty, then the system shall reject it with "Distance is required"; if it is not a number after trimming surrounding whitespace, then the system shall reject it with "Invalid distance. Enter a number (e.g., 3.5)".
 - [x] **QE-013**: If a run's distance is zero or negative, then the system shall reject it with "Distance must be positive"; if it exceeds 200 miles, then the system shall reject it with "Distance seems unrealistic (>200 miles)".
-- [ ] **QE-024**: If the Date of a Quick Entry submission is after today's local date, then the system shall reject it with "Date cannot be in the future".
-- [x] **QE-014**: When a Quick Entry submission has more than one invalid field, the system shall report only the first failure in the order Date, Time, Distance, distance bounds.
+- [x] **QE-024**: If the date and time of a Quick Entry submission are after the current local date and time, then the system shall reject it with "Date cannot be in the future" when the date is after today, or with "Time cannot be in the future" when the date is today and the time is later than now.
+- [x] **QE-014**: When a Quick Entry submission has more than one invalid field, the system shall report only the first failure in the order Date format, Time format, not in the future (QE-024), Distance, distance bounds.
 
 ## Submit
 
 - [x] **QE-015**: When the user presses Enter on the Quick Entry screen, the system shall remove any previous success or error message before validating the submission.
-- [ ] **QE-016**: When the user presses Enter on the Quick Entry screen while not in edit mode and the submission is valid, the system shall save it as a new run, show "Run logged successfully!", clear Distance and Note, keep Date, set Time to the current local time in whole seconds, and focus Distance.
-- [ ] **QE-017**: When the user presses Enter on the Quick Entry screen while in edit mode and the submission is valid, the system shall save it as an update to the run being edited, reset the Quick Entry form as when cleared (QE-007), reload the run history, and switch to the Run List screen with the edited run selected so its new values are visible.
+- [x] **QE-016**: When the user presses Enter on the Quick Entry screen while not in edit mode and the submission is valid, the system shall save it as a new run, show "Run logged successfully!", clear Distance and Note, keep Date, set Time to the current local time in whole seconds, and focus Distance.
+- [x] **QE-017**: When the user presses Enter on the Quick Entry screen while in edit mode and the submission is valid, the system shall save it as an update to the run being edited, reset the Quick Entry form as when cleared (QE-007), reload the run history, and switch to the Run List screen with the edited run selected so its new values are visible.
 - [x] **QE-018**: If reloading the run history after a Quick Entry edit is saved fails, then the system shall keep the Quick Entry form reset and still switch to the Run List screen, which shows the load error (RL-012).
 - [x] **QE-019**: If a Quick Entry submission is invalid, then the system shall show the validation message and keep every field value and the edit mode unchanged.
 - [x] **QE-020**: If saving a valid Quick Entry submission fails in storage, then the system shall show "Database error: " followed by the reason and keep every field value and the edit mode unchanged.
@@ -38,4 +38,4 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 ## Edit Mode
 
 - [x] **QE-022**: When a run is handed to Quick Entry for editing (`e` on Run List), the system shall fill Date as `YYYY-MM-DD`, Time as `HH:MM:SS`, Distance as a plain number and Note (empty if none) from that run, focus Distance, remove any message, and enter edit mode for that run.
-- [ ] **QE-023**: When the user switches away from the Quick Entry screen while in edit mode, the system shall cancel the edit by resetting the Quick Entry form as when cleared (QE-007), so the abandoned edit cannot overwrite the run later.
+- [x] **QE-023**: While Quick Entry is in edit mode, when the user switches to the Run List or Analytics screen (directly or by way of Help), the system shall cancel the edit by resetting the Quick Entry form as when cleared (QE-007), so the abandoned edit cannot overwrite the run later; switching to Help alone shall keep the edit.

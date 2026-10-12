@@ -32,8 +32,8 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: quick-entry.md
-    next: "Fix QE-024 (reject future dates), QE-016 (refresh Time after insert), QE-023 (cancel edit on leave), QE-017 (post-edit landing); add tests"
-    drift: "Gaps QE-016, QE-017, QE-023, QE-024: stale Time after insert, edited run not selected after edit, sticky edit mode, future dates accepted"
+    next: "Add tests for remaining QE specs; decide Date refresh across midnight"
+    drift: null
 
   run-list:
     status: MAPPED
@@ -44,8 +44,8 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: run-list.md
-    next: "Fix RL-007 (scroll with selection), RL-010 (keep position after delete), RL-011 (select edited run, with QE-017); add tests"
-    drift: "Gaps RL-007, RL-010, RL-011: selection not scrolled into view, reset to top after delete and after edit"
+    next: "Fix RL-010 (keep row position after delete); add tests"
+    drift: "Gap RL-010: selection resets to the top after a delete"
 
   analytics:
     status: MAPPED
@@ -68,5 +68,5 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: navigation.md
-    next: "Wire QE-023 edit cancel on screen switch, add NAV-018 Esc→Help, fix NAV-016 hints and README; add key-routing tests"
+    next: "Add NAV-018 Esc→Help, fix NAV-016 hints and README; add key-routing tests"
     drift: "Gaps NAV-016, NAV-018: footer/Help hints misdescribe Quick Entry keys; no Esc→Help"

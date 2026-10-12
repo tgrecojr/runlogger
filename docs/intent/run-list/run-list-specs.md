@@ -2,7 +2,7 @@
 
 Design: `docs/intent/run-list/run-list-design.md` · Prefix: `RL`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/input/tests.rs` (RL-012, RL-013), `src/ui/tests.rs` (RL-004, RL-012).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/input/tests.rs` (RL-011, RL-012, RL-013), `src/ui/tests.rs` (RL-004, RL-007, RL-012).
 
 ## Loading
 
@@ -18,14 +18,14 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 ## Selection
 
 - [x] **RL-006**: While the Run List screen is shown, when the user presses ↑ the system shall move the selection up one run, and when the user presses ↓ the system shall move it down one run, stopping at the first and last runs.
-- [ ] **RL-007**: While the Run List screen is shown, the system shall scroll the table so that the selected run is always visible within the rendered height.
+- [x] **RL-007**: While the Run List screen is shown, the system shall scroll the table so that the selected run is always visible within the rendered height.
 
 ## Edit and Delete
 
 - [x] **RL-008**: While the Run List screen shows at least one run, when the user presses `e`, the system shall hand the selected run to Quick Entry for editing and switch to the Quick Entry screen.
 - [x] **RL-009**: While the Run List screen shows at least one run, when the user presses `d`, the system shall delete the selected run from storage immediately, without confirmation, and reload the run history.
 - [ ] **RL-010**: When the Run List reloads after a delete, the system shall keep the selection at the same row position (now holding the run that followed the deleted one), or on the last run if the deleted run was the last row.
-- [ ] **RL-011**: When the Run List screen is shown after Quick Entry saves an edit, the system shall select the edited run.
+- [x] **RL-011**: When the Run List screen is shown after Quick Entry saves an edit, the system shall select the edited run.
 
 ## Errors
 
