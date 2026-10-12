@@ -12,61 +12,61 @@ taxonomy:
 
 arrows:
   storage:
-    status: MAPPED
+    status: PARTIAL
     parent: null
     sampled: 2026-10-12
-    audited: null
-    audited_sha: null
+    audited: 2026-10-12
+    audited_sha: 88de5b9b9c9518240a4ee43ffb9612e1258a6085
     blocks: [quick-entry, run-list, analytics, navigation]
     blockedBy: []
     detail: storage.md
-    next: "Add tests for STORE-001..006 and STORE-008..012"
-    drift: null
+    next: "Fix STORE-014 repair scope; add tests for untested STORE specs"
+    drift: "STORE-014: repair truncates any time_started longer than 8 characters, not only fractional-second values"
 
   quick-entry:
-    status: MAPPED
+    status: PARTIAL
     parent: null
     sampled: 2026-10-12
-    audited: null
-    audited_sha: null
+    audited: 2026-10-12
+    audited_sha: 88de5b9b9c9518240a4ee43ffb9612e1258a6085
     blocks: []
     blockedBy: [storage]
     detail: quick-entry.md
-    next: "Add tests for remaining QE specs; decide Date refresh across midnight"
-    drift: null
+    next: "Reject NaN distances (QE-012, QE-013); decide QE-020 cause text; add tests"
+    drift: "QE-012/QE-013: \"NaN\" passes distance validation and fails later as a database error"
 
   run-list:
-    status: MAPPED
+    status: AUDITED
     parent: null
     sampled: 2026-10-12
-    audited: null
-    audited_sha: null
+    audited: 2026-10-12
+    audited_sha: 88de5b9b9c9518240a4ee43ffb9612e1258a6085
     blocks: []
     blockedBy: [storage]
     detail: run-list.md
-    next: "Add tests for remaining RL specs"
+    next: "Add tests for untested RL specs; wrap long error line"
     drift: null
 
   analytics:
-    status: MAPPED
+    status: AUDITED
     parent: null
     sampled: 2026-10-12
-    audited: null
-    audited_sha: null
+    audited: 2026-10-12
+    audited_sha: 88de5b9b9c9518240a4ee43ffb9612e1258a6085
     blocks: []
     blockedBy: [storage]
     detail: analytics.md
-    next: "Add tests for AN-007..010; clarify rolling-period labels"
-    drift: null
+    next: "Make chart distance display use goal_met's hundredths; reword AN-009; add tests"
+    drift: "Design claim false: 0.995 displays \"0.99 mi\" but counts as goal-met"
 
   navigation:
-    status: MAPPED
+    status: AUDITED
     parent: null
     sampled: 2026-10-12
-    audited: null
-    audited_sha: null
+    audited: 2026-10-12
+    audited_sha: 88de5b9b9c9518240a4ee43ffb9612e1258a6085
     blocks: []
     blockedBy: [storage]
     detail: navigation.md
-    next: "Add key-routing and lifecycle tests; Esc-prefix indicator; real data path in Help"
-    drift: null
+    next: "Reword NAV-004/010/012/015; add key-routing and lifecycle tests"
+    drift: "Spec wording broader than behavior: NAV-004, NAV-010, NAV-012, NAV-015"

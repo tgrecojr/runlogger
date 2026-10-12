@@ -4,7 +4,7 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 ## Status
 
-**MAPPED** — mapped 2026-10-12; not yet audited. All 13 specs implemented.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`). All 13 specs verified against code.
 
 ## References
 
@@ -22,10 +22,10 @@ The history view: full run list newest first, selection, edit hand-off and immed
 - src/ui/tests.rs (RL-004, RL-007, RL-012)
 
 ### Code
-- src/app.rs (`RunListState`, `select_run`)
-- src/input/run_list.rs (`handle_run_list_input`)
-- src/input/mod.rs (`load_runs`)
-- src/ui/screens/run_list.rs
+- src/app.rs (RL-011)
+- src/input/mod.rs (RL-001, RL-012)
+- src/input/run_list.rs (RL-006, RL-008, RL-009, RL-010, RL-013)
+- src/ui/screens/run_list.rs (RL-002, RL-003, RL-004, RL-005, RL-007, RL-012, RL-013)
 
 ## Architecture
 
@@ -39,21 +39,26 @@ The history view: full run list newest first, selection, edit hand-off and immed
 
 ## Spec Coverage
 
-| Category | Spec IDs | Implemented | Deferred | Gaps |
-|----------|----------|-------------|----------|------|
-| Loading | RL-001 | 1 | 0 | 0 |
-| Display | RL-002 to RL-005 | 4 | 0 | 0 |
-| Selection | RL-006 to RL-007 | 2 | 0 | 0 |
-| Edit and delete | RL-008 to RL-011 | 4 | 0 | 0 |
-| Errors | RL-012 to RL-013 | 2 | 0 | 0 |
+| Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
+|----------|----------|-------------|----------|------|--------|
+| Loading | RL-001 | 1 | 0 | 0 | 0 |
+| Display | RL-002, RL-003, RL-004, RL-005 | 4 | 0 | 0 | 1 |
+| Selection | RL-006, RL-007 | 2 | 0 | 0 | 1 |
+| Edit and Delete | RL-008, RL-009, RL-010, RL-011 | 4 | 0 | 0 | 2 |
+| Errors | RL-012, RL-013 | 2 | 0 | 0 | 2 |
 
-**Summary:** 13 of 13 specs implemented. Tests cite RL-004, RL-007 and RL-010 to RL-013.
+**Summary:** 13 of 13 specs marked implemented; 6 of 13 cited by a test. Untested: RL-001, RL-002, RL-003, RL-005, RL-006, RL-008, RL-009.
 
 ## Key Findings
 
-None outstanding.
+1. **Long errors are cut off** — the RL-012/RL-013 error line is one row, so a long cause chain is truncated rather than wrapped.
+2. **"1 runs"** — the table title does not singularize.
+3. **Reload on re-open** — pressing `2` while on Run List reloads and moves the selection to the top.
 
 ## Work Required
 
 ### Should Fix
 1. Add tests for RL-001 to RL-003, RL-005, RL-006, RL-008 and RL-009.
+
+### Nice to Have
+2. Wrap long error messages; singular "1 run"; keep the selection when `2` is pressed on Run List.

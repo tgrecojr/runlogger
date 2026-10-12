@@ -4,7 +4,7 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 ## Status
 
-**MAPPED** — mapped 2026-10-12; not yet audited. All 24 specs implemented.
+**PARTIAL** — audited 2026-10-12 (git SHA `88de5b9`). 21 of 24 specs verified against code; "NaN" is accepted as a distance (QE-012, QE-013) and database errors omit their cause (QE-020).
 
 ## References
 
@@ -18,15 +18,15 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 - docs/intent/quick-entry/quick-entry-specs.md (24 specs)
 
 ### Tests
-- src/logic/validation.rs (inline; QE-010, QE-024)
 - src/input/tests.rs (QE-014, QE-016, QE-017, QE-018, QE-023, QE-024)
+- src/logic/validation.rs (QE-010, QE-024)
 
 ### Code
-- src/app.rs (`QuickEntryState`, `InputField`; edit cancel in `App::switch_to_screen`)
-- src/input/quick_entry.rs (`handle_quick_entry_input`, `submit`, `build_run`)
-- src/logic/validation.rs
-- src/models/run.rs (`Run::new`)
-- src/ui/screens/quick_entry.rs
+- src/app.rs (QE-001, QE-007, QE-022, QE-023)
+- src/input/quick_entry.rs (QE-002, QE-003, QE-004, QE-014, QE-015, QE-016, QE-017, QE-018, QE-019, QE-020, QE-024)
+- src/logic/validation.rs (QE-008, QE-009, QE-010, QE-011, QE-012, QE-024)
+- src/models/run.rs (QE-013)
+- src/ui/screens/quick_entry.rs (QE-005, QE-006, QE-021)
 
 ## Architecture
 
@@ -41,26 +41,30 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 ## Spec Coverage
 
-| Category | Spec IDs | Implemented | Deferred | Gaps |
-|----------|----------|-------------|----------|------|
-| Form | QE-001 to QE-007 | 7 | 0 | 0 |
-| Parsing and validation | QE-008 to QE-014, QE-024 | 8 | 0 | 0 |
-| Submit | QE-015 to QE-021 | 7 | 0 | 0 |
-| Edit mode | QE-022 to QE-023 | 2 | 0 | 0 |
+| Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
+|----------|----------|-------------|----------|------|--------|
+| Form | QE-001, QE-002, QE-003, QE-004, QE-005, QE-006, QE-007 | 7 | 0 | 0 | 0 |
+| Parsing and Validation | QE-008, QE-009, QE-010, QE-011, QE-012, QE-013, QE-024, QE-014 | 8 | 0 | 0 | 3 |
+| Submit | QE-015, QE-016, QE-017, QE-018, QE-019, QE-020, QE-021 | 7 | 0 | 0 | 3 |
+| Edit Mode | QE-022, QE-023 | 2 | 0 | 0 | 1 |
 
-**Summary:** 24 of 24 specs implemented. Tests cite QE-010, QE-014, QE-016, QE-017, QE-018, QE-023, QE-024.
+**Summary:** 24 of 24 specs marked implemented; 7 of 24 cited by a test. Untested: QE-001, QE-002, QE-003, QE-004, QE-005, QE-006, QE-007, QE-008, QE-009, QE-011, QE-012, QE-013, QE-015, QE-019, QE-020, QE-021, QE-022.
 
 ## Key Findings
 
-1. **NaN distance passes app validation** — `Run::new` comparisons are false for NaN; storage outcome unverified.
-2. **Date prefill across midnight** — Date is captured at startup and on clear, so a run logged after midnight without editing Date lands on the previous day.
+1. **"NaN" accepted as a distance** — `parse_distance` uses `str::parse::<f64>`, which accepts `NaN`; it passes both `Run::new` bounds (NaN comparisons are false) and is then rejected by the database's NOT NULL rule, so the user sees "Database error: Failed to insert run" instead of "Invalid distance…" (QE-012, QE-013).
+2. **Database errors omit the cause** — `submit` formats storage errors with `{}`, showing only "Failed to insert run"/"Failed to update run", while Run List and Analytics use `{:#}` to include the underlying cause (QE-020; contrast RL-012, AN-014).
+3. **Date not normalized after a save** — Date is kept exactly as typed (e.g. `10/12/2026`); Date and Time are not trimmed, so surrounding spaces make them invalid. Not covered by a spec.
 
 ## Work Required
 
+### Must Fix
+1. Reject non-finite distances with "Invalid distance. Enter a number (e.g., 3.5)" (QE-012, QE-013).
+
 ### Should Fix
-1. Decide whether Date refreshes across midnight.
-2. Reject non-finite distances explicitly.
-3. Add tests for the remaining QE specs (QE-001 to QE-009, QE-011 to QE-013, QE-015, QE-019 to QE-022).
+2. Decide whether QE-020's message should include the underlying cause, as RL-012 and AN-014 do.
+3. Decide whether Date refreshes across midnight.
+4. Add tests for the 17 untested QE specs.
 
 ### Nice to Have
-4. Make labels and error messages list every accepted format; treat whitespace-only Distance as empty.
+5. Make labels and error messages list every accepted format; trim Date/Time; treat whitespace-only Distance as empty.
