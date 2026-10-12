@@ -31,6 +31,7 @@ pub struct QuickEntryState {
 }
 
 impl QuickEntryState {
+    // @spec QE-001
     pub fn new() -> Self {
         let now = Local::now().naive_local();
         Self {
@@ -45,6 +46,7 @@ impl QuickEntryState {
         }
     }
 
+    // @spec QE-007
     pub fn clear(&mut self) {
         let now = Local::now().naive_local();
         self.date = validation::format_date(&now.date());
@@ -57,6 +59,7 @@ impl QuickEntryState {
         self.editing_run_id = None;
     }
 
+    // @spec QE-022
     pub fn load_run(&mut self, run: &Run) {
         self.date = validation::format_date(&run.date);
         self.time = validation::format_time(&run.time_started);
@@ -104,6 +107,7 @@ pub struct RunListState {
     pub runs: Vec<Run>,
     pub selected_index: usize,
     pub scroll_offset: usize,
+    pub error_message: Option<String>,
 }
 
 impl RunListState {
@@ -112,18 +116,21 @@ impl RunListState {
             runs: Vec::new(),
             selected_index: 0,
             scroll_offset: 0,
+            error_message: None,
         }
     }
 }
 
 pub struct AnalyticsState {
     pub analytics: Analytics,
+    pub error_message: Option<String>,
 }
 
 impl AnalyticsState {
     pub fn new() -> Self {
         Self {
             analytics: Analytics::empty(),
+            error_message: None,
         }
     }
 }

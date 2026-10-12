@@ -7,6 +7,7 @@ use ratatui::{
     Frame,
 };
 
+// @spec QE-005, QE-006, QE-021
 pub fn render(f: &mut Frame, area: Rect, state: &QuickEntryState) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)

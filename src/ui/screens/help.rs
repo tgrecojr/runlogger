@@ -6,6 +6,7 @@ use ratatui::{
     Frame,
 };
 
+// @spec NAV-015, NAV-016
 pub fn render(f: &mut Frame, area: Rect) {
     let help_text = vec![
         Line::from(""),

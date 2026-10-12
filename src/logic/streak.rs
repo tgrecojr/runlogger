@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 const DAILY_GOAL_MILES: f64 = 1.0;
 const MONTHS_TO_SHOW: usize = 12;
 
+// @spec AN-001, AN-002, AN-003, AN-004, AN-005, AN-006, AN-007
 pub fn calculate_analytics(runs: &[Run]) -> Analytics {
     if runs.is_empty() {
         return Analytics::empty();
@@ -110,20 +111,14 @@ fn calculate_current_streak(daily_totals: &BTreeMap<NaiveDate, f64>) -> u32 {
     let mut streak = 0;
     let mut current_date = Local::now().naive_local().date();
 
-    loop {
-        if let Some(&distance) = daily_totals.get(&current_date) {
-            if distance >= DAILY_GOAL_MILES {
-                streak += 1;
-                if let Some(prev_date) = current_date.pred_opt() {
-                    current_date = prev_date;
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        } else {
+    while let Some(&distance) = daily_totals.get(&current_date) {
+        if distance < DAILY_GOAL_MILES {
             break;
+        }
+        streak += 1;
+        match current_date.pred_opt() {
+            Some(prev_date) => current_date = prev_date,
+            None => break,
         }
     }
 
@@ -177,7 +172,7 @@ fn calculate_recent_trend(daily_totals: &BTreeMap<NaiveDate, f64>, days: i64) ->
             distance,
         });
 
-        current_date = current_date + chrono::Duration::days(1);
+        current_date += chrono::Duration::days(1);
     }
 
     trend

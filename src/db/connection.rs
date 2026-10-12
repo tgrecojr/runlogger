@@ -3,6 +3,7 @@ use rusqlite::Connection;
 use std::fs;
 use std::path::PathBuf;
 
+// @spec STORE-001, STORE-002
 pub fn get_db_path() -> Result<PathBuf> {
     let data_dir = dirs::data_dir().context("Failed to get data directory")?;
 
@@ -21,6 +22,7 @@ pub fn open_connection(db_path: &PathBuf) -> Result<Connection> {
     Ok(conn)
 }
 
+// @spec STORE-001, STORE-002, STORE-003
 pub fn init_db(db_path: &PathBuf) -> Result<Connection> {
     let conn = open_connection(db_path)?;
     crate::db::migrations::init_database(&conn).context("Failed to initialize database")?;
