@@ -1,5 +1,6 @@
 use rusqlite::{Connection, Result};
 
+// @spec STORE-003, STORE-004, STORE-005, STORE-014
 pub fn init_database(conn: &Connection) -> Result<()> {
     conn.execute_batch(
         "
@@ -17,5 +18,18 @@ pub fn init_database(conn: &Connection) -> Result<()> {
         CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at DESC);
         ",
     )?;
+    repair_start_times(conn);
     Ok(())
+}
+
+/// Rewrites start times stored with fractional seconds (by older versions) to
+/// whole seconds. A row whose rewrite would duplicate another run is left as is;
+/// a failed repair is ignored because reads tolerate fractional times.
+// @spec STORE-014
+fn repair_start_times(conn: &Connection) {
+    let _ = conn.execute(
+        "UPDATE OR IGNORE runs SET time_started = substr(time_started, 1, 8)
+         WHERE length(time_started) > 8",
+        [],
+    );
 }

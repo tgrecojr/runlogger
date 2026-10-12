@@ -1,5 +1,7 @@
 pub mod components;
 pub mod screens;
+#[cfg(test)]
+mod tests;
 pub mod theme;
 
 use crate::app::{App, Screen};
@@ -26,8 +28,9 @@ pub fn render(f: &mut Frame, app: &App) {
     render_footer(f, chunks[2], app.screen);
 }
 
+// @spec NAV-013
 fn render_header(f: &mut Frame, area: Rect, current_screen: Screen) {
-    let tabs = vec![
+    let tabs = [
         ("1", "Quick Entry", current_screen == Screen::QuickEntry),
         ("2", "Run List", current_screen == Screen::RunList),
         ("3", "Analytics", current_screen == Screen::Analytics),
@@ -69,6 +72,7 @@ fn render_screen(f: &mut Frame, area: Rect, app: &App) {
     }
 }
 
+// @spec NAV-014, NAV-016
 fn render_footer(f: &mut Frame, area: Rect, current_screen: Screen) {
     let footer_text = match current_screen {
         Screen::QuickEntry => {

@@ -35,6 +35,7 @@ pub struct MonthlyData {
 }
 
 impl Analytics {
+    // @spec AN-013
     pub fn empty() -> Self {
         Self {
             current_streak: 0,

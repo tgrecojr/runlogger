@@ -1,4 +1,5 @@
 use crate::app::RunListState;
+use crate::ui::theme;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -7,17 +8,28 @@ use ratatui::{
     Frame,
 };
 
+// @spec RL-002, RL-003, RL-004, RL-005, RL-007, RL-012, RL-013
 pub fn render(f: &mut Frame, area: Rect, state: &RunListState) {
-    // Split area for table and hints
+    // Split area for an optional error line, the table and hints
+    let error_rows = if state.error_message.is_some() { 1 } else { 0 };
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Min(10),   // Table
-            Constraint::Length(3), // Hints
+            Constraint::Length(error_rows), // Error
+            Constraint::Min(10),            // Table
+            Constraint::Length(3),          // Hints
         ])
         .split(area);
+    let (error_area, chunks) = (chunks[0], &chunks[1..]);
 
-    if state.runs.is_empty() {
+    if let Some(ref error) = state.error_message {
+        f.render_widget(
+            Paragraph::new(error.as_str()).style(theme::error_style()),
+            error_area,
+        );
+    }
+
+    if state.runs.is_empty() && state.error_message.is_none() {
         let empty_message = Block::default()
             .borders(Borders::ALL)
             .title("Run List")

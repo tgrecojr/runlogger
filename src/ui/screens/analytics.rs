@@ -4,11 +4,17 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, Paragraph},
+    widgets::{Block, Borders, Paragraph, Wrap},
     Frame,
 };
 
+// @spec AN-009, AN-010, AN-011, AN-012, AN-013, AN-014
 pub fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
+    if let Some(ref error) = state.error_message {
+        render_error(f, area, error);
+        return;
+    }
+
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(1)
@@ -24,6 +30,15 @@ pub fn render(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     render_stats(f, chunks[1], state);
     render_chart(f, chunks[2], state);
     render_monthly_breakdown(f, chunks[3], state);
+}
+
+/// Replaces every panel: no figures are shown from a history that could not be read.
+fn render_error(f: &mut Frame, area: Rect, error: &str) {
+    let panel = Paragraph::new(error)
+        .style(theme::error_style())
+        .wrap(Wrap { trim: false })
+        .block(Block::default().borders(Borders::ALL).title("Analytics"));
+    f.render_widget(panel, area);
 }
 
 fn render_streak(f: &mut Frame, area: Rect, state: &AnalyticsState) {

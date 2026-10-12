@@ -1,0 +1,72 @@
+schema_version: 2
+last_updated: 2026-10-12
+
+taxonomy:
+  foundation:
+    - storage
+    - navigation
+  capabilities:
+    - quick-entry
+    - run-list
+    - analytics
+
+arrows:
+  storage:
+    status: MAPPED
+    parent: null
+    sampled: 2026-10-12
+    audited: null
+    audited_sha: null
+    blocks: [quick-entry, run-list, analytics, navigation]
+    blockedBy: []
+    detail: storage.md
+    next: "Add tests for STORE-001..006 and STORE-008..012"
+    drift: null
+
+  quick-entry:
+    status: MAPPED
+    parent: null
+    sampled: 2026-10-12
+    audited: null
+    audited_sha: null
+    blocks: []
+    blockedBy: [storage]
+    detail: quick-entry.md
+    next: "Fix QE-024 (reject future dates), QE-016 (refresh Time after insert), QE-023 (cancel edit on leave), QE-017 (post-edit landing); add tests"
+    drift: "Gaps QE-016, QE-017, QE-023, QE-024: stale Time after insert, edited run not selected after edit, sticky edit mode, future dates accepted"
+
+  run-list:
+    status: MAPPED
+    parent: null
+    sampled: 2026-10-12
+    audited: null
+    audited_sha: null
+    blocks: []
+    blockedBy: [storage]
+    detail: run-list.md
+    next: "Fix RL-007 (scroll with selection), RL-010 (keep position after delete), RL-011 (select edited run, with QE-017); add tests"
+    drift: "Gaps RL-007, RL-010, RL-011: selection not scrolled into view, reset to top after delete and after edit"
+
+  analytics:
+    status: MAPPED
+    parent: null
+    sampled: 2026-10-12
+    audited: null
+    audited_sha: null
+    blocks: []
+    blockedBy: [storage]
+    detail: analytics.md
+    next: "Fix AN-002 (streak from yesterday while today unfinished), AN-001 (rounding tolerance), AN-011 (14-day chart), AN-004/AN-006 (windows end today); add tests"
+    drift: "Gaps AN-001, AN-002, AN-004, AN-006, AN-011"
+
+  navigation:
+    status: MAPPED
+    parent: null
+    sampled: 2026-10-12
+    audited: null
+    audited_sha: null
+    blocks: []
+    blockedBy: [storage]
+    detail: navigation.md
+    next: "Wire QE-023 edit cancel on screen switch, add NAV-018 Esc→Help, fix NAV-016 hints and README; add key-routing tests"
+    drift: "Gaps NAV-016, NAV-018: footer/Help hints misdescribe Quick Entry keys; no Esc→Help"
