@@ -6,8 +6,9 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 
 ## Location and Startup
 
-- [x] **STORE-001**: On startup, the system shall open the run database at `runlogger/runs.db` inside the platform's per-user data directory, creating the `runlogger` directory and the database file if they do not exist.
+- [x] **STORE-001**: On startup, the system shall open the run database at `runlogger/runs.db` inside the per-user data directory (STORE-018), creating the `runlogger` directory and the database file if they do not exist.
 - [x] **STORE-002**: If the per-user data directory cannot be determined, or the `runlogger` directory or database cannot be created or opened, then the system shall exit with an error message before the terminal UI is shown.
+- [x] **STORE-018**: On Linux and macOS, the system shall use `$XDG_DATA_HOME` as the per-user data directory when that variable is set to an absolute path, and `.local/share` inside the user's home directory otherwise.
 - [x] **STORE-003**: On startup, the system shall create the `runs` table and its indexes if they do not exist, and shall leave any existing run data unchanged apart from the start-time repair (STORE-014).
 - [x] **STORE-016**: The system shall record the database's schema version (SQLite `user_version`) and, on startup, apply in order every schema migration newer than the recorded version, recording the new version after each; a database already at the current version shall be left unchanged.
 - [x] **STORE-017**: If the database's recorded schema version is newer than any this version of the app knows, then the system shall exit at startup, before the terminal UI is shown, with an error saying the database was written by a newer version of Run Logger.

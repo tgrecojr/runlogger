@@ -7,7 +7,7 @@ prefix: STORE
 
 ## Context and Design Philosophy
 
-Storage keeps the user's run history on local disk and hands it back to the rest of the app. Run Logger is a single-user, offline terminal app, so storage is one embedded SQLite file in the platform's per-user data directory — no server, no sync, no accounts.
+Storage keeps the user's run history on local disk and hands it back to the rest of the app. Run Logger is a single-user, offline terminal app, so storage is one embedded SQLite file in the user's XDG data directory — no server, no sync, no accounts.
 
 Storage owns the *persisted shape* of a run: which columns exist, how dates and times are written as text, and what the database itself refuses (duplicates, missing required fields). It does not own what makes a run *valid* to log — distance bounds and input formats belong to Quick Entry (`QE`), which builds `Run` values via `Run::new` before handing them to storage.
 
@@ -19,7 +19,7 @@ Code: `src/db/connection.rs`, `src/db/migrations.rs`, `src/db/queries.rs`, and t
 
 At startup `main` calls `get_db_path` then `init_db` before the terminal enters raw mode:
 
-1. `get_db_path` resolves `dirs::data_dir()` (on macOS: `~/Library/Application Support`), appends `runlogger/`, creates that directory if missing, and returns `runlogger/runs.db`.
+1. `get_db_path` resolves the per-user data directory with `etcetera::choose_base_strategy()` — `$XDG_DATA_HOME` when it holds an absolute path, otherwise `~/.local/share`, on Linux and macOS alike (on Windows, the roaming application-data folder) — appends `runlogger/`, creates that directory if missing, and returns `runlogger/runs.db`. A relative or empty `XDG_DATA_HOME` is ignored, as the XDG Base Directory specification requires.
 2. `init_db` opens the SQLite file (creating it if absent) and runs `init_database`.
 3. Any failure here propagates out of `main` as an `anyhow` error with context ("Failed to get data directory", "Failed to create application directory", "Failed to open database connection", "Failed to initialize database"), so the process exits before the TUI is drawn and the message is printed to a normal terminal.
 
@@ -95,7 +95,8 @@ A uniqueness violation on insert or update is reported as a typed `StorageError:
 | Decision | Chosen | Alternatives Considered | Rationale |
 |---|---|---|---|
 | Storage engine | Embedded SQLite via `rusqlite` with the `bundled` feature | JSON/CSV flat file; system SQLite | Single-user local app wants a durable file with real constraints and ordering; `bundled` avoids depending on the OS's libsqlite version. |
-| Database location | `dirs::data_dir()/runlogger/runs.db` | Working directory; config flag; XDG override | Platform-conventional per-user data location; app works from any directory with no setup. |
+| Database location | `$XDG_DATA_HOME/runlogger/runs.db` (default `~/.local/share/runlogger/runs.db`) on Linux and macOS | Platform-native folders (`~/Library/Application Support` on macOS); working directory; config flag | A terminal tool gets one predictable layout on every Unix-like system, matching where other command-line tools keep data and where dotfile setups expect it; `XDG_DATA_HOME` relocates it without a flag; the app works from any directory with no setup. |
+| Directory resolution | `etcetera` base strategy | `dirs` (native folders on macOS); hand-written `XDG_DATA_HOME`/`HOME` lookup | `etcetera`'s base strategy applies the XDG rules — including ignoring non-absolute values — on macOS as well as Linux, without the app carrying its own environment-handling code. |
 | Date/time representation | Separate naive-local `date` and `time_started` TEXT columns | Single UTC timestamp; Unix epoch integer | The local calendar day is the unit of the daily goal, so the date is stored directly rather than derived from a zone-dependent instant; ISO text sorts correctly. |
 | Duplicate protection | `UNIQUE(date, time_started)`, reported as a typed `DuplicateStart` error | No constraint; dedupe in app; callers match SQLite's message text | Guards against double-submitting the same entry; a typed error lets the UI explain the conflict without depending on SQLite's wording. |
 | Released migrations | Never edited; corrections are new migrations (e.g. migration 2 drops an index migration 1 created) | Edit migration 1 in place | Databases already at a version have run the old text; only a new migration reaches them. |
@@ -117,4 +118,4 @@ None.
 - Tests: listed in `docs/arrows/storage.md`
 - Specs: `docs/intent/storage/storage-specs.md`
 - Consumers: Quick Entry (`QE`) for insert/update; Run List (`RL`) for read/delete; Analytics (`AN`) for read; Navigation (`NAV`) for startup and error propagation
-- External: `rusqlite` 0.40 (bundled SQLite), `chrono` 0.4, `dirs` 7, `anyhow` 1
+- External: `rusqlite` 0.40 (bundled SQLite), `chrono` 0.4, `etcetera` 0.11, `anyhow` 1

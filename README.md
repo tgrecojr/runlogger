@@ -29,6 +29,19 @@ cargo build --release
 ./target/release/runlogger
 ```
 
+Or install it onto your `PATH`:
+
+```bash
+cargo install --path . --locked
+```
+
+This builds a release binary and copies it to cargo's bin directory (`~/.cargo/bin` by default), replacing any earlier install. Run the same command again after pulling changes to upgrade. To install somewhere else — for example `~/.local/bin` — pass `--root ~/.local`, or set it once in `~/.cargo/config.toml`:
+
+```toml
+[install]
+root = "/home/you/.local"   # cargo installs into <root>/bin
+```
+
 ## Usage
 
 ### Navigation
@@ -77,9 +90,18 @@ The header shows the key for each screen: on Quick Entry it shows the Esc form (
 
 ## Data Storage
 
-Your runs are stored in an SQLite database in your platform's data directory (the Help screen shows the exact path) — on macOS:
+Your runs are stored in an SQLite database in your XDG data directory (the Help screen shows the exact path). On Linux and macOS that is:
 ```
-~/Library/Application Support/runlogger/runs.db
+$XDG_DATA_HOME/runlogger/runs.db      # when XDG_DATA_HOME is set to an absolute path
+~/.local/share/runlogger/runs.db      # otherwise
+```
+
+Back up or move that `runlogger` folder to keep your history. The app reads no configuration file; if one is added it will live in `$XDG_CONFIG_HOME/runlogger/` (default `~/.config/runlogger/`).
+
+**Moving from an earlier version on macOS:** earlier versions kept the database in `~/Library/Application Support/runlogger/`, which this version does not read. Move it once, before launching the new version:
+```bash
+mkdir -p ~/.local/share
+mv ~/Library/Application\ Support/runlogger ~/.local/share/runlogger
 ```
 
 If stored data can't be read, Run List or Analytics shows the error in red (naming the run and the bad value) and the app keeps running.

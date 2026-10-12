@@ -1,11 +1,21 @@
 use anyhow::{Context, Result};
+use etcetera::BaseStrategy;
 use rusqlite::Connection;
 use std::fs;
 use std::path::PathBuf;
 
 // @spec STORE-001, STORE-002
 pub fn get_db_path() -> Result<PathBuf> {
-    db_path_in(dirs::data_dir())
+    db_path_in(data_dir())
+}
+
+/// The per-user data directory: `$XDG_DATA_HOME` (when absolute) or
+/// `~/.local/share` on Linux and macOS; `None` if no home directory is found.
+// @spec STORE-018
+fn data_dir() -> Option<PathBuf> {
+    etcetera::choose_base_strategy()
+        .ok()
+        .map(|strategy| strategy.data_dir())
 }
 
 /// `runlogger/runs.db` inside the per-user data directory, creating

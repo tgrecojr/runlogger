@@ -68,6 +68,7 @@ All state lives in one `App` value owned by the event loop; each screen has its 
 
 **Cross-cutting conventions**
 
+- **Per-user files follow the XDG base directories.** On Linux and macOS alike, data lives under `$XDG_DATA_HOME` (default `~/.local/share`) and any configuration under `$XDG_CONFIG_HOME` (default `~/.config`), each in a `runlogger/` folder; paths are resolved with `etcetera`'s base strategy. Paths that depend on one machine or user never appear in the repository.
 - **Dates are local calendar days.** Runs carry a naive local date and start time; "today" means the user's local date.
 - **Full-history reads.** Run List and Analytics reload the entire history each time they open. At one user and roughly one run a day, the history stays small for years.
 - **Errors stay on screen.** A failing storage operation is shown on the screen that triggered it; the app ends only on a quit command or a terminal failure.
@@ -98,4 +99,4 @@ All state lives in one `App` value owned by the event loop; each screen has its 
 - Component design docs and specs: `docs/intent/`
 - Arrow index and per-component status: `docs/arrows/index.yaml`, `docs/arrows/*.md`
 - User-facing documentation: `README.md`
-- Libraries: `ratatui` 0.30, `crossterm` 0.29, `rusqlite` 0.40 (bundled SQLite), `chrono` 0.4, `dirs` 7, `anyhow` 1
+- Libraries: `ratatui` 0.30, `crossterm` 0.29, `rusqlite` 0.40 (bundled SQLite), `chrono` 0.4, `etcetera` 0.11, `anyhow` 1
