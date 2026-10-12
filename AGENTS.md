@@ -6,8 +6,8 @@ A single-user terminal app for logging daily runs and tracking a streak toward t
 ## Tech Stack
 - Language: Rust (2021 edition)
 - Framework: Ratatui (TUI) with the Crossterm backend
-- Database: SQLite via `rusqlite` (bundled), one file at `<platform data dir>/runlogger/runs.db`
-- Other: `chrono` (dates/times), `anyhow` / `thiserror` (errors), `dirs` (data directory)
+- Database: SQLite via `rusqlite` (bundled), one file at `$XDG_DATA_HOME/runlogger/runs.db` (default `~/.local/share/runlogger/runs.db`) on Linux and macOS
+- Other: `chrono` (dates/times), `anyhow` / `thiserror` (errors), `etcetera` (XDG base directories)
 
 ## Commands
 - `cargo run --release` — Build and run the app
@@ -28,7 +28,7 @@ Five components, each with a design doc and EARS specs under `docs/intent/<compo
 Tests are `#[cfg(test)]` modules beside the code they test (a `tests.rs` or `tests/` folder next to each module), sharing helpers from `src/test_support.rs` (in-memory database, raw rows, key events, full-UI rendering). Each test that exercises a spec carries a `// @spec` comment; `docs/arrows/<segment>.md` lists them.
 
 ## Environment Variables
-None. The app reads no environment variables.
+- `XDG_DATA_HOME` (optional) — base directory for the database; used only when set to an absolute path, otherwise `~/.local/share`.
 
 ## LID
 - Mode: Full

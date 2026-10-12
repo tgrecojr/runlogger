@@ -93,3 +93,21 @@ fn unopenable_database_is_an_error() {
         "{err:#}"
     );
 }
+
+// @spec STORE-018
+#[cfg(unix)]
+#[test]
+fn data_directory_follows_xdg_base_directories() {
+    // Reads the real environment without changing it, so it is safe beside
+    // parallel tests.
+    let expected = std::env::var_os("XDG_DATA_HOME")
+        .map(PathBuf::from)
+        .filter(|p| p.is_absolute())
+        .unwrap_or_else(|| {
+            PathBuf::from(std::env::var_os("HOME").expect("HOME is set"))
+                .join(".local")
+                .join("share")
+        });
+
+    assert_eq!(data_dir(), Some(expected));
+}

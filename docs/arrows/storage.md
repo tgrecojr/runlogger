@@ -4,7 +4,7 @@ Local SQLite persistence of the run history — location, schema, stored formats
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then schema versioning (STORE-016, STORE-017), the unreadable-distance error (STORE-015) and earlier fixes landed with tests. All 17 specs implemented and tested.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then schema versioning (STORE-016, STORE-017), the unreadable-distance error (STORE-015) and earlier fixes landed with tests. All 18 specs implemented and tested; the database location follows the XDG base directories (STORE-018).
 
 ## References
 
@@ -15,16 +15,16 @@ Local SQLite persistence of the run history — location, schema, stored formats
 - docs/intent/storage/storage-design.md
 
 ### EARS
-- docs/intent/storage/storage-specs.md (17 specs)
+- docs/intent/storage/storage-specs.md (18 specs)
 
 ### Tests
-- src/db/connection/tests.rs (STORE-001, STORE-002, STORE-003)
+- src/db/connection/tests.rs (STORE-001, STORE-002, STORE-003, STORE-018)
 - src/db/queries/tests/reads.rs (STORE-012, STORE-013, STORE-015)
 - src/db/queries/tests/startup.rs (STORE-003, STORE-014, STORE-016, STORE-017)
 - src/db/queries/tests/writes.rs (STORE-004, STORE-005, STORE-006, STORE-007, STORE-008, STORE-009, STORE-010, STORE-011)
 
 ### Code
-- src/db/connection.rs (STORE-001, STORE-002, STORE-003)
+- src/db/connection.rs (STORE-001, STORE-002, STORE-003, STORE-018)
 - src/db/migrations.rs (STORE-003, STORE-004, STORE-005, STORE-014, STORE-016, STORE-017)
 - src/db/queries.rs (STORE-005, STORE-006, STORE-007, STORE-008, STORE-009, STORE-010, STORE-011, STORE-012, STORE-013, STORE-015)
 
@@ -33,7 +33,7 @@ Local SQLite persistence of the run history — location, schema, stored formats
 **Purpose:** Keep the user's run history in one embedded SQLite file and return it to the rest of the app.
 
 **Key Components:**
-1. `connection.rs` — resolves `<data_dir>/runlogger/runs.db`, opens it, runs schema setup
+1. `connection.rs` — resolves `<XDG data dir>/runlogger/runs.db` via `etcetera`, opens it, runs schema setup
 2. `migrations.rs` — idempotent DDL plus the fractional-start-time repair
 3. `queries.rs` — writes with whole-second times; reads raw rows and converts them in `to_run`
 
@@ -41,11 +41,11 @@ Local SQLite persistence of the run history — location, schema, stored formats
 
 | Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
 |----------|----------|-------------|----------|------|--------|
-| Location and Startup | STORE-001, STORE-002, STORE-003, STORE-016, STORE-017, STORE-014 | 6 | 0 | 0 | 6 |
+| Location and Startup | STORE-001, STORE-002, STORE-003, STORE-016, STORE-017, STORE-014, STORE-018 | 7 | 0 | 0 | 7 |
 | Persisted Shape | STORE-004, STORE-005, STORE-006, STORE-007, STORE-008 | 5 | 0 | 0 | 5 |
 | Operations | STORE-009, STORE-010, STORE-011, STORE-012, STORE-013, STORE-015 | 6 | 0 | 0 | 6 |
 
-**Summary:** 17 of 17 specs marked implemented; 17 of 17 cited by a test. Untested: none.
+**Summary:** 18 of 18 specs marked implemented; 18 of 18 cited by a test. Untested: none.
 
 ## Key Findings
 
