@@ -235,3 +235,65 @@ fn short_terminal_keeps_today_and_the_full_monthly_header() {
         "{screen}"
     );
 }
+
+fn screen_on(screen: Screen, width: u16) -> String {
+    let mut app = App::new();
+    app.switch_to_screen(screen);
+    let mut terminal = Terminal::new(TestBackend::new(width, 40)).unwrap();
+    terminal.draw(|f| render(f, &mut app)).unwrap();
+    text(terminal.backend().buffer())
+}
+
+const FOOTERS: [(Screen, &str); 4] = [
+    (
+        Screen::QuickEntry,
+        "[Tab] Field  [Enter] Save  [Esc Esc] Clear  [Esc 1-3/h] Screen/Help  [^Q] Quit",
+    ),
+    (
+        Screen::RunList,
+        "[↑↓] Navigate  [e] Edit  [d] Delete  [1-3] Screen  [h] Help  [q] Quit",
+    ),
+    (Screen::Analytics, "[1-3] Screen  [h] Help  [q] Quit"),
+    (Screen::Help, "[1-3] Screen  [q] Quit"),
+];
+
+// @spec NAV-014, NAV-016
+#[test]
+fn each_footer_is_accurate_and_fits_an_80_column_terminal() {
+    for (screen, footer) in FOOTERS {
+        let shown = screen_on(screen, 80);
+        let last_lines: Vec<&str> = shown.lines().rev().take(3).collect();
+        assert!(
+            last_lines.iter().any(|l| l.contains(footer)),
+            "{screen:?} footer should read {footer:?}:\n{}",
+            last_lines.join("\n")
+        );
+    }
+}
+
+// @spec NAV-013, NAV-016
+#[test]
+fn header_shows_esc_keys_on_quick_entry_and_direct_keys_elsewhere() {
+    let quick_entry = screen_on(Screen::QuickEntry, 100);
+    let header: String = quick_entry.lines().take(3).collect();
+    assert!(
+        header.contains("[Esc 1] Quick Entry  [Esc 2] Run List  [Esc 3] Analytics  [Esc h] Help"),
+        "{header}"
+    );
+
+    let run_list = screen_on(Screen::RunList, 100);
+    let header: String = run_list.lines().take(3).collect();
+    assert!(
+        header.contains("[1] Quick Entry  [2] Run List  [3] Analytics  [h] Help"),
+        "{header}"
+    );
+}
+
+// @spec NAV-016
+#[test]
+fn help_describes_esc_commands_and_where_direct_keys_work() {
+    let help = screen_on(Screen::Help, 100);
+    assert!(help.contains("[Esc] then [h] or [?]"), "{help}");
+    assert!(help.contains("not in Quick Entry"), "{help}");
+    assert!(!help.contains("works from any screen"), "{help}");
+}

@@ -44,11 +44,13 @@ pub(super) fn handle_run_list_input(app: &mut App, key: KeyEvent, conn: &Connect
                     app.run_list_state.error_message = Some(format!("Could not delete run: {e:#}"));
                     return;
                 }
+                // Keep the selection at the same row (now the next run), or on
+                // the new last row when the last run was deleted.
+                let position = app.run_list_state.selected_index;
                 load_runs(app, conn);
-                // Adjust selected index if needed
                 let state = &mut app.run_list_state;
-                if state.selected_index >= state.runs.len() && !state.runs.is_empty() {
-                    state.selected_index = state.runs.len() - 1;
+                if !state.runs.is_empty() {
+                    state.selected_index = position.min(state.runs.len() - 1);
                 }
             }
         }

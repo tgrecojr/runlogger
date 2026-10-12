@@ -43,7 +43,7 @@ Handled by `handle_run_list_input` after Navigation's global keys:
 
 Scrolling is left to ratatui: each frame the renderer sets `table_state`'s selection from `selected_index` and draws the table as a stateful widget, which moves the stored offset just enough to keep the selected row inside the rendered height (`RL-007`). Because `table_state` persists in `RunListState`, the view scrolls one row at a time in both directions rather than jumping. Rendering therefore takes the app state mutably. `load_runs` resets `table_state` along with the selection.
 
-**Divergence (selection after delete).** The clamp after the delete reload intends to keep the selection near where the deleted run was, but `load_runs` has already reset it to 0, so the selection always jumps to the newest run (`RL-010`).
+After a successful delete, the handler remembers the deleted row's position, reloads, and restores the selection to that position — now holding the run that followed — or to the last row if the deleted run was last (`RL-010`). If the reload fails, the list is empty and RL-012's error shows instead.
 
 ## Display
 
@@ -77,7 +77,7 @@ Columns are fixed at 12/10/15 characters with Note taking the rest (min 20). Dis
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **Hints are split.** The footer (`NAV`) shows `[↑↓] Navigate [1-3] Switch screen [h] Help [q] Quit` while the Actions panel shows `e`/`d`; neither lists everything available on the screen.
+None.
 
 ## References
 
