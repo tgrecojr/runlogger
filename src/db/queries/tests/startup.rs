@@ -51,10 +51,7 @@ fn startup_creates_runs_table_and_indexes() {
         "SELECT group_concat(type || ' ' || name, ', ') FROM (SELECT type, name
          FROM sqlite_master WHERE tbl_name = 'runs' AND sql IS NOT NULL ORDER BY name)",
     );
-    assert_eq!(
-        objects,
-        "index idx_runs_created_at, index idx_runs_date, table runs"
-    );
+    assert_eq!(objects, "index idx_runs_date, table runs");
 }
 
 // @spec STORE-003
@@ -116,4 +113,30 @@ fn database_from_a_newer_app_is_refused() {
         "{err:#}"
     );
     assert_eq!(user_version(&conn), 99);
+}
+
+// @spec STORE-016
+#[test]
+fn version_1_database_drops_the_unused_index_and_keeps_its_runs() {
+    let conn = rusqlite::Connection::open_in_memory().unwrap();
+    conn.execute_batch(
+        "CREATE TABLE runs (id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL,
+             time_started TEXT NOT NULL, distance_miles REAL NOT NULL, note TEXT,
+             created_at TEXT NOT NULL, UNIQUE(date, time_started));
+         CREATE INDEX idx_runs_date ON runs(date DESC);
+         CREATE INDEX idx_runs_created_at ON runs(created_at DESC);
+         INSERT INTO runs (date, time_started, distance_miles, note, created_at)
+             VALUES ('2026-10-01', '07:00:00', 2.0, NULL, '2026-01-01T00:00:00+00:00');
+         PRAGMA user_version = 1;",
+    )
+    .unwrap();
+
+    init_database(&conn).unwrap();
+    assert_eq!(user_version(&conn), 2);
+    let created_at_index = scalar(
+        &conn,
+        "SELECT CAST(count(*) AS TEXT) FROM sqlite_master WHERE name = 'idx_runs_created_at'",
+    );
+    assert_eq!(created_at_index, "0");
+    assert_eq!(get_all_runs(&conn).unwrap().len(), 1);
 }

@@ -2,7 +2,6 @@ use crate::app::{InputField, QuickEntryState};
 use crate::ui::theme;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Modifier, Style},
     widgets::{Block, Borders, Paragraph, Wrap},
     Frame,
 };
@@ -24,7 +23,7 @@ pub fn render(f: &mut Frame, area: Rect, state: &QuickEntryState) {
 
     let title = Block::default()
         .borders(Borders::NONE)
-        .style(Style::default().add_modifier(Modifier::BOLD));
+        .style(theme::screen_title());
     let title_str = if state.is_editing() {
         "Edit Run"
     } else {
@@ -32,7 +31,7 @@ pub fn render(f: &mut Frame, area: Rect, state: &QuickEntryState) {
     };
     let title_text = Paragraph::new(title_str)
         .block(title)
-        .style(Style::default().add_modifier(Modifier::BOLD));
+        .style(theme::screen_title());
     f.render_widget(title_text, chunks[0]);
 
     render_input_field(
@@ -85,9 +84,9 @@ fn render_input_field(f: &mut Frame, area: Rect, label: &str, value: &str, is_fo
     };
 
     let border_style = if is_focused {
-        Style::default().fg(ratatui::style::Color::Yellow)
+        theme::focused_border()
     } else {
-        Style::default().fg(ratatui::style::Color::Gray)
+        theme::unfocused_border()
     };
 
     let display_value = if is_focused {

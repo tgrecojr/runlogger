@@ -22,7 +22,7 @@ fn db_path_in(data_dir: Option<PathBuf>) -> Result<PathBuf> {
     Ok(app_dir.join("runs.db"))
 }
 
-pub fn open_connection(db_path: &PathBuf) -> Result<Connection> {
+fn open_connection(db_path: &PathBuf) -> Result<Connection> {
     let conn = Connection::open(db_path).context("Failed to open database connection")?;
 
     Ok(conn)

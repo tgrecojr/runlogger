@@ -2,7 +2,6 @@ use crate::app::AnalyticsState;
 use crate::ui::theme;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
-    style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
     Frame,
@@ -58,11 +57,11 @@ fn window(runs: u32, average: f64) -> Vec<Line<'static>> {
 
 fn stat(label: &'static str, value: String) -> Line<'static> {
     Line::from(vec![
-        Span::styled(label, Style::default().fg(Color::Gray)),
+        Span::styled(label, theme::muted()),
         Span::styled(value, theme::stat_style()),
     ])
 }
 
 fn heading(text: &'static str) -> Line<'static> {
-    Line::from(Span::styled(text, Style::default().fg(Color::Cyan)))
+    Line::from(Span::styled(text, theme::heading()))
 }

@@ -1,6 +1,7 @@
+use crate::ui::theme;
 use ratatui::{
     layout::Rect,
-    style::{Color, Modifier, Style},
+    style::Style,
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph, Wrap},
     Frame,
@@ -10,12 +11,7 @@ use ratatui::{
 pub fn render(f: &mut Frame, area: Rect, db_location: Option<&str>) {
     let mut help_text = vec![
         Line::from(""),
-        heading(
-            "Run Logger - Help",
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        ),
+        heading("Run Logger - Help", theme::help_title()),
         Line::from(""),
     ];
     for section in [
@@ -41,7 +37,7 @@ fn heading(text: &'static str, style: Style) -> Line<'static> {
 }
 
 fn section(title: &'static str, lines: &[&'static str]) -> Vec<Line<'static>> {
-    let mut out = vec![heading(title, Style::default().fg(Color::Cyan))];
+    let mut out = vec![heading(title, theme::heading())];
     out.extend(lines.iter().map(|l| Line::from(*l)));
     out
 }
@@ -84,12 +80,7 @@ fn run_list() -> Vec<Line<'static>> {
 }
 
 fn goal() -> Vec<Line<'static>> {
-    let mut lines = vec![heading(
-        "Your Goal:",
-        Style::default()
-            .fg(Color::Green)
-            .add_modifier(Modifier::BOLD),
-    )];
+    let mut lines = vec![heading("Your Goal:", theme::goal_met_style())];
     lines.extend(
         [
             "  Run at least 1 mile every day; runs on the same day add up.",
@@ -103,7 +94,7 @@ fn goal() -> Vec<Line<'static>> {
 /// The database actually in use, as opened at startup.
 fn data_location(db_location: Option<&str>) -> Vec<Line<'static>> {
     vec![
-        heading("Data Location:", Style::default().fg(Color::Cyan)),
+        heading("Data Location:", theme::heading()),
         Line::from(format!("  {}", db_location.unwrap_or("(not opened)"))),
     ]
 }

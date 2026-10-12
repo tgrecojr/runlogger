@@ -20,7 +20,7 @@ arrows:
     blocks: [quick-entry, run-list, analytics, navigation]
     blockedBy: []
     detail: storage.md
-    next: "Nice-to-have only: remove unused query and index"
+    next: null
     drift: null
 
   quick-entry:
@@ -68,5 +68,5 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: navigation.md
-    next: "Nice-to-have only: modifier keys; ui/components stubs; theme colors"
+    next: "Nice-to-have only: decide modifier keys"
     drift: null

@@ -1,8 +1,8 @@
 use crate::app::AnalyticsState;
 use crate::logic::streak::{format_miles, goal_met, hundredths};
+use crate::ui::theme;
 use ratatui::{
     layout::Rect,
-    style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, Paragraph},
     Frame,
@@ -14,7 +14,7 @@ pub(super) fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     if state.analytics.recent_trend.is_empty() {
         let empty = Paragraph::new("No data to display")
             .block(Block::default().borders(Borders::ALL).title("Last 14 Days"))
-            .style(Style::default().fg(Color::Gray));
+            .style(theme::muted());
         f.render_widget(empty, area);
         return;
     }
@@ -22,9 +22,7 @@ pub(super) fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
     let mut text_lines = vec![
         Line::from(Span::styled(
             "Daily Mileage (Green = Goal Met ≥1.0 mi)",
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
+            theme::panel_heading(),
         )),
         Line::from(""),
     ];
@@ -37,13 +35,11 @@ pub(super) fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         let distance_str = format_miles(day_data.distance);
 
         let style = if goal_met(day_data.distance) {
-            Style::default()
-                .fg(Color::Green)
-                .add_modifier(Modifier::BOLD)
+            theme::goal_met_style()
         } else if hundredths(day_data.distance) > 0 {
-            Style::default().fg(Color::Yellow)
+            theme::goal_partial_style()
         } else {
-            Style::default().fg(Color::Red)
+            theme::goal_not_met_style()
         };
 
         // Create a visual bar using characters
@@ -51,7 +47,7 @@ pub(super) fn render_chart(f: &mut Frame, area: Rect, state: &AnalyticsState) {
         let bar = "█".repeat(bar_length);
 
         text_lines.push(Line::from(vec![
-            Span::styled(format!("{:<6}", date_str), Style::default().fg(Color::Gray)),
+            Span::styled(format!("{:<6}", date_str), theme::muted()),
             Span::styled(format!("{:>8}", distance_str), style),
             Span::raw("  "),
             Span::styled(bar, style),
@@ -73,7 +69,7 @@ pub(super) fn render_monthly_breakdown(f: &mut Frame, area: Rect, state: &Analyt
                     .borders(Borders::ALL)
                     .title("Mileage by Month"),
             )
-            .style(Style::default().fg(Color::Gray));
+            .style(theme::muted());
         f.render_widget(empty, area);
         return;
     }
@@ -81,9 +77,7 @@ pub(super) fn render_monthly_breakdown(f: &mut Frame, area: Rect, state: &Analyt
     let mut text_lines = vec![
         Line::from(Span::styled(
             "Monthly Totals (Green ≥50 mi, Yellow ≥25 mi)",
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
+            theme::panel_heading(),
         )),
         Line::from(""),
     ];
@@ -94,20 +88,15 @@ pub(super) fn render_monthly_breakdown(f: &mut Frame, area: Rect, state: &Analyt
         // Judge the color on the total as displayed (whole tenths of a mile).
         let tenths = (month_data.total_distance * 10.0).round() as i64;
         let style = if tenths >= 500 {
-            Style::default()
-                .fg(Color::Green)
-                .add_modifier(Modifier::BOLD)
+            theme::volume_high()
         } else if tenths >= 250 {
-            Style::default().fg(Color::Yellow)
+            theme::volume_mid()
         } else {
-            Style::default().fg(Color::White)
+            theme::volume_low()
         };
 
         text_lines.push(Line::from(vec![
-            Span::styled(
-                format!("{:<9}", month_str),
-                Style::default().fg(Color::Gray),
-            ),
+            Span::styled(format!("{:<9}", month_str), theme::muted()),
             Span::styled(
                 format!("{:>6} mi", format!("{}.{}", tenths / 10, tenths % 10)),
                 style,
@@ -117,7 +106,7 @@ pub(super) fn render_monthly_breakdown(f: &mut Frame, area: Rect, state: &Analyt
                     "  ({} runs, {:.1} avg)",
                     month_data.run_count, month_data.average_distance
                 ),
-                Style::default().fg(Color::Gray),
+                theme::muted(),
             ),
         ]));
     }

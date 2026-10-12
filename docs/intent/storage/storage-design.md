@@ -43,6 +43,8 @@ CREATE INDEX IF NOT EXISTS idx_runs_date ON runs(date DESC);
 CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at DESC);
 ```
 
+That is migration 1, unchanged since release. Migration 2 is `DROP INDEX IF EXISTS idx_runs_created_at;` — no query orders or filters by `created_at`, so the index only cost space and write time. The current schema (version 2) is therefore the `runs` table with the single `idx_runs_date` index.
+
 **Schema versioning (`STORE-016`, `STORE-017`).** The schema version lives in SQLite's `user_version`. `MIGRATIONS` is an ordered list of SQL batches; migration *n* brings a database to version *n*. Migration 1 is the DDL above — written with `IF NOT EXISTS`, so databases created before versioning (version 0, tables already present) pass through it unchanged. On startup `init_database` reads `user_version`, runs each newer migration inside a transaction that also sets `user_version` to that migration's number, and leaves a current database untouched. A recorded version higher than `MIGRATIONS.len()` means a newer app wrote the file; startup fails with `StorageError::NewerSchema` ("This database was written by a newer version of Run Logger (schema N; this version supports M)") rather than risk misreading it. The next schema change is a new entry appended to `MIGRATIONS`.
 
 After the DDL, `repair_start_times` repairs start times written with fractional seconds by earlier versions:
@@ -77,7 +79,6 @@ All in `src/db/queries.rs`; every function takes `&Connection` and returns `anyh
 |---|---|---|
 | `insert_run(run) -> i64` | INSERT of date, time, distance, note, created_at; returns new rowid | Quick Entry submit (`src/input/quick_entry.rs`) |
 | `get_all_runs() -> Vec<Run>` | SELECT all, `ORDER BY date DESC, time_started DESC` | `load_runs`, `load_analytics` (`src/input/mod.rs`) |
-| `get_runs_by_date_range(start, end)` | Same conversion, filtered by inclusive date range | none — `#[allow(dead_code)]` |
 | `update_run(run)` | UPDATE date, time, distance, note by id; errors if `run.id` is `None`; `created_at` untouched | Quick Entry submit while editing |
 | `delete_run(id)` | DELETE by id | Run List `d` (`src/input/run_list.rs`) |
 
@@ -97,6 +98,7 @@ A uniqueness violation on insert or update is reported as a typed `StorageError:
 | Database location | `dirs::data_dir()/runlogger/runs.db` | Working directory; config flag; XDG override | Platform-conventional per-user data location; app works from any directory with no setup. |
 | Date/time representation | Separate naive-local `date` and `time_started` TEXT columns | Single UTC timestamp; Unix epoch integer | The local calendar day is the unit of the daily goal, so the date is stored directly rather than derived from a zone-dependent instant; ISO text sorts correctly. |
 | Duplicate protection | `UNIQUE(date, time_started)`, reported as a typed `DuplicateStart` error | No constraint; dedupe in app; callers match SQLite's message text | Guards against double-submitting the same entry; a typed error lets the UI explain the conflict without depending on SQLite's wording. |
+| Released migrations | Never edited; corrections are new migrations (e.g. migration 2 drops an index migration 1 created) | Edit migration 1 in place | Databases already at a version have run the old text; only a new migration reaches them. |
 | Schema evolution | Ordered migrations recorded in `user_version`; refuse a newer schema | `IF NOT EXISTS` DDL only; a migration crate | Gives the next schema change a safe path for existing databases without a dependency; refusing a newer schema protects data written by a newer app. |
 | Read strategy | Load the entire table on each screen switch | Date-range queries; SQL aggregation for analytics | Data volume is tiny; in-memory computation keeps analytics logic in Rust and testable without SQL. |
 | Connection lifetime | One connection for the process, passed by reference | Open per operation; pool | Single-threaded event loop, single user. |
@@ -107,7 +109,7 @@ A uniqueness violation on insert or update is reported as a typed `StorageError:
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **Unused surface.** `get_runs_by_date_range` is dead code; `idx_runs_created_at` serves no query; `open_connection` is public but only called by `init_db`. Keep, remove, or put to use?
+None.
 
 ## References
 
