@@ -4,7 +4,7 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); non-finite distances fixed afterwards (QE-012, QE-013) and covered by tests. One open decision: whether QE-020's message includes the underlying cause.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then QE-012, QE-013 and QE-020 were changed and tested. All 24 specs implemented and tested.
 
 ## References
 
@@ -18,9 +18,13 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 - docs/intent/quick-entry/quick-entry-specs.md (24 specs)
 
 ### Tests
-- src/input/tests.rs (QE-014, QE-016, QE-017, QE-018, QE-023, QE-024)
-- src/logic/validation.rs (QE-010, QE-012, QE-024)
+- src/input/quick_entry/tests/form.rs (QE-001, QE-002, QE-003, QE-004, QE-007)
+- src/input/quick_entry/tests/submit.rs (QE-008, QE-011, QE-015, QE-019, QE-020, QE-022)
+- src/input/tests/edits.rs (QE-014, QE-016, QE-017, QE-023, QE-024)
+- src/input/tests/errors.rs (QE-018)
+- src/logic/validation.rs (QE-008, QE-009, QE-010, QE-011, QE-012, QE-024)
 - src/models/run.rs (QE-013)
+- src/ui/screens/quick_entry/tests.rs (QE-005, QE-006, QE-021)
 
 ### Code
 - src/app.rs (QE-001, QE-007, QE-022, QE-023)
@@ -44,24 +48,22 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 | Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
 |----------|----------|-------------|----------|------|--------|
-| Form | QE-001, QE-002, QE-003, QE-004, QE-005, QE-006, QE-007 | 7 | 0 | 0 | 0 |
-| Parsing and Validation | QE-008, QE-009, QE-010, QE-011, QE-012, QE-013, QE-024, QE-014 | 8 | 0 | 0 | 5 |
-| Submit | QE-015, QE-016, QE-017, QE-018, QE-019, QE-020, QE-021 | 7 | 0 | 0 | 3 |
-| Edit Mode | QE-022, QE-023 | 2 | 0 | 0 | 1 |
+| Form | QE-001, QE-002, QE-003, QE-004, QE-005, QE-006, QE-007 | 7 | 0 | 0 | 7 |
+| Parsing and Validation | QE-008, QE-009, QE-010, QE-011, QE-012, QE-013, QE-024, QE-014 | 8 | 0 | 0 | 8 |
+| Submit | QE-015, QE-016, QE-017, QE-018, QE-019, QE-020, QE-021 | 7 | 0 | 0 | 7 |
+| Edit Mode | QE-022, QE-023 | 2 | 0 | 0 | 2 |
 
-**Summary:** 24 of 24 specs marked implemented; 9 of 24 cited by a test. Untested: QE-001, QE-002, QE-003, QE-004, QE-005, QE-006, QE-007, QE-008, QE-009, QE-011, QE-015, QE-019, QE-020, QE-021, QE-022.
+**Summary:** 24 of 24 specs marked implemented; 24 of 24 cited by a test. Untested: none.
 
 ## Key Findings
 
-1. **Database errors omit the cause** — `submit` formats storage errors with `{}`, showing only "Failed to insert run"/"Failed to update run", while Run List and Analytics use `{:#}` to include the underlying cause (QE-020; contrast RL-012, AN-014).
-2. **Date not normalized after a save** — Date is kept exactly as typed (e.g. `10/12/2026`); Date and Time are not trimmed, so surrounding spaces make them invalid. Not covered by a spec.
+1. **Date not normalized after a save** — Date is kept exactly as typed (e.g. `10/12/2026`); Date and Time are not trimmed, so surrounding spaces make them invalid. Not covered by a spec.
+2. **Date prefill across midnight** — the Date field is captured at startup and on clear.
 
 ## Work Required
 
 ### Should Fix
-1. Decide whether QE-020's message should include the underlying cause, as RL-012 and AN-014 do.
-2. Decide whether Date refreshes across midnight.
-3. Add tests for the untested QE specs.
+1. Decide whether Date refreshes across midnight.
 
 ### Nice to Have
-4. Make labels and error messages list every accepted format; trim Date/Time; treat whitespace-only Distance as empty.
+2. Make labels and error messages list every accepted format; trim Date/Time; treat whitespace-only Distance as empty.

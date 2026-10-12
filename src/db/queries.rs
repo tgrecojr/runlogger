@@ -3,6 +3,13 @@ use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDate, NaiveTime, Timelike, Utc};
 use rusqlite::{params, Connection, Params};
 
+/// Storage failures callers need to tell apart from generic SQLite errors.
+#[derive(Debug, thiserror::Error)]
+pub enum StorageError {
+    #[error("Another run already starts at {date} {time}")]
+    DuplicateStart { date: NaiveDate, time: NaiveTime },
+}
+
 const DATE_FORMAT: &str = "%Y-%m-%d";
 /// Start times are stored to the whole second, whatever precision the caller supplies.
 const TIME_FORMAT: &str = "%H:%M:%S";
@@ -20,7 +27,7 @@ pub fn insert_run(conn: &Connection, run: &Run) -> Result<i64> {
             run.created_at.to_rfc3339(),
         ],
     )
-    .context("Failed to insert run")?;
+    .map_err(|e| write_error(e, run, "Failed to insert run"))?;
 
     Ok(conn.last_insert_rowid())
 }
@@ -50,6 +57,29 @@ pub fn get_runs_by_date_range(
          ORDER BY date DESC, time_started DESC",
         params![start_date.to_string(), end_date.to_string()],
     )
+}
+
+/// A uniqueness violation becomes a typed `DuplicateStart` naming the
+/// conflicting date and start time; anything else keeps its SQLite cause.
+// @spec STORE-005
+fn write_error(e: rusqlite::Error, run: &Run, context: &'static str) -> anyhow::Error {
+    let duplicate = matches!(
+        &e,
+        rusqlite::Error::SqliteFailure(f, _)
+            if f.extended_code == rusqlite::ffi::SQLITE_CONSTRAINT_UNIQUE
+    );
+    if duplicate {
+        let time = run
+            .time_started
+            .with_nanosecond(0)
+            .unwrap_or(run.time_started);
+        anyhow::Error::new(StorageError::DuplicateStart {
+            date: run.date,
+            time,
+        })
+    } else {
+        anyhow::Error::new(e).context(context)
+    }
 }
 
 /// A `runs` row as stored, before any text column is parsed.
@@ -120,7 +150,7 @@ pub fn update_run(conn: &Connection, run: &Run) -> Result<()> {
             id,
         ],
     )
-    .context("Failed to update run")?;
+    .map_err(|e| write_error(e, run, "Failed to update run"))?;
     Ok(())
 }
 

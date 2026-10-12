@@ -2,7 +2,7 @@
 
 Design: `docs/intent/quick-entry/quick-entry-design.md` · Prefix: `QE`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/logic/validation.rs` (QE-010, QE-012, QE-024), `src/models/run.rs` (QE-013), `src/input/tests.rs` (QE-014, QE-016, QE-017, QE-018, QE-023, QE-024).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. The tests citing each spec are listed in `docs/arrows/quick-entry.md`, regenerated from `@spec` scans.
 
 ## Form
 
@@ -32,7 +32,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 - [x] **QE-017**: When the user presses Enter on the Quick Entry screen while in edit mode and the submission is valid, the system shall save it as an update to the run being edited, reset the Quick Entry form as when cleared (QE-007), reload the run history, and switch to the Run List screen with the edited run selected so its new values are visible.
 - [x] **QE-018**: If reloading the run history after a Quick Entry edit is saved fails, then the system shall keep the Quick Entry form reset and still switch to the Run List screen, which shows the load error (RL-012).
 - [x] **QE-019**: If a Quick Entry submission is invalid, then the system shall show the validation message and keep every field value and the edit mode unchanged.
-- [x] **QE-020**: If saving a valid Quick Entry submission fails in storage, then the system shall show "Database error: " followed by the reason and keep every field value and the edit mode unchanged.
+- [x] **QE-020**: If saving a valid Quick Entry submission fails in storage, then the system shall keep every field value and the edit mode unchanged and show a message naming the problem and the next step: when another run already has the same date and start time, "Another run already starts at <date> <time> — change the Time and press Enter to save."; otherwise "Could not save run: <reason including its underlying cause>. Your entry is still here — press Enter to try again."
 - [x] **QE-021**: The Quick Entry screen shall show an error message in bold red, or otherwise a success message in bold green, below the fields.
 
 ## Edit Mode

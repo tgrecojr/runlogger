@@ -1,9 +1,12 @@
 //! Shared helpers for unit tests: an in-memory database with the real schema,
 //! raw row insertion (to simulate rows written by older versions or by hand),
-//! and key-event constructors.
+//! key-event constructors, and helpers for rendering the whole UI into a
+//! test buffer and finding text in it.
 
+use crate::app::App;
 use crate::db::migrations::init_database;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use ratatui::{backend::TestBackend, buffer::Buffer, Terminal};
 use rusqlite::{params, Connection};
 
 pub fn memory_db() -> Connection {
@@ -46,4 +49,37 @@ pub fn key(code: KeyCode) -> KeyEvent {
 
 pub fn ch(c: char) -> KeyEvent {
     key(KeyCode::Char(c))
+}
+
+/// Renders the full UI (header, current screen, footer) at `width` x `height`.
+pub fn draw_app(app: &mut App, width: u16, height: u16) -> Buffer {
+    let mut terminal = Terminal::new(TestBackend::new(width, height)).unwrap();
+    terminal.draw(|f| crate::ui::render(f, app)).unwrap();
+    terminal.backend().buffer().clone()
+}
+
+/// The buffer as text, one line per row.
+pub fn buffer_text(buf: &Buffer) -> String {
+    (0..buf.area.height)
+        .map(|y| {
+            (0..buf.area.width)
+                .map(|x| buf[(x, y)].symbol())
+                .collect::<String>()
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+/// Screen position of the first cell of `needle`; panics with the screen if absent.
+pub fn locate(buf: &Buffer, needle: &str) -> (u16, u16) {
+    let screen = buffer_text(buf);
+    let line_len = buf.area.width as usize + 1;
+    let at = screen
+        .find(needle)
+        .unwrap_or_else(|| panic!("{needle:?} not on screen:\n{screen}"));
+    let prefix_chars = screen[..at].chars().count();
+    (
+        (prefix_chars % line_len) as u16,
+        (prefix_chars / line_len) as u16,
+    )
 }

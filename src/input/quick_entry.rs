@@ -1,6 +1,7 @@
 use super::load_runs;
 use crate::app::{App, InputField, QuickEntryState, Screen};
-use crate::logic::validation::{current_time, format_time};
+use crate::db::queries::StorageError;
+use crate::logic::validation::{current_time, format_date, format_time};
 use crate::models::run::Run;
 use crate::{db, logic};
 use anyhow::Result;
@@ -34,7 +35,7 @@ pub(super) fn handle_quick_entry_input(app: &mut App, key: KeyEvent, conn: &Conn
     }
 }
 
-// @spec QE-015, QE-016, QE-017, QE-018, QE-019, QE-020
+// @spec QE-015, QE-016, QE-017, QE-018, QE-019
 fn submit(app: &mut App, conn: &Connection) {
     let state = &mut app.quick_entry_state;
     state.error_message = None;
@@ -60,7 +61,7 @@ fn submit(app: &mut App, conn: &Connection) {
                     app.run_list_state.select_run(id);
                     app.switch_to_screen(Screen::RunList);
                 }
-                Err(e) => state.error_message = Some(format!("Database error: {}", e)),
+                Err(e) => state.error_message = Some(save_error_message(&e)),
             }
         }
         None => match db::queries::insert_run(conn, &run) {
@@ -72,8 +73,23 @@ fn submit(app: &mut App, conn: &Connection) {
                 state.focused_field = InputField::Distance;
                 state.success_message = Some("Run logged successfully!".to_string());
             }
-            Err(e) => state.error_message = Some(format!("Database error: {}", e)),
+            Err(e) => state.error_message = Some(save_error_message(&e)),
         },
+    }
+}
+
+/// Says what went wrong with a save and what the user can do about it.
+// @spec QE-020
+fn save_error_message(e: &anyhow::Error) -> String {
+    match e.downcast_ref::<StorageError>() {
+        Some(StorageError::DuplicateStart { date, time }) => format!(
+            "Another run already starts at {} {} — change the Time and press Enter to save.",
+            format_date(date),
+            format_time(time)
+        ),
+        None => format!(
+            "Could not save run: {e:#}. Your entry is still here — press Enter to try again."
+        ),
     }
 }
 
@@ -88,3 +104,6 @@ fn build_run(state: &QuickEntryState) -> Result<Run> {
     let note = (!state.note.is_empty()).then(|| state.note.clone());
     Run::new(date, time, distance, note)
 }
+
+#[cfg(test)]
+mod tests;

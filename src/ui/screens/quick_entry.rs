@@ -105,3 +105,6 @@ fn render_input_field(f: &mut Frame, area: Rect, label: &str, value: &str, is_fo
 
     f.render_widget(input, area);
 }
+
+#[cfg(test)]
+mod tests;

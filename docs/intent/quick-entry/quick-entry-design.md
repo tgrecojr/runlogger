@@ -62,8 +62,15 @@ Enter ─▶ clear messages ─▶ parse Date ─▶ parse Time ─▶ parse Dis
        └─ Some(id) ─▶ update_run(id) ─▶ reset form (as Clear),
                                         reload runs, switch to Run List
                                         with run `id` selected
-       storage error: error_message = "Database error: <reason>"
+       storage error: error_message = what happened + what to do (below)
 ```
+
+A failed save keeps every field and the edit mode, and the message says what happened and what to do next (`QE-020`):
+
+| Storage failure | Message |
+|---|---|
+| Duplicate date and start time (`StorageError::DuplicateStart`, `STORE-005`) | `Another run already starts at <date> <time> — change the Time and press Enter to save.` |
+| Anything else | `Could not save run: <reason including its underlying cause>. Your entry is still here — press Enter to try again.` |
 
 If the post-edit reload fails, the form stays reset, the switch to Run List still happens, and Run List shows the load error (`RL-012`); the edit itself has already been saved.
 
@@ -108,6 +115,7 @@ Run logged successfully!              ← red error takes precedence over green 
 | After a new run is saved | Keep Date, refresh Time to the current clock in whole seconds, clear Distance and Note | Keep Date and Time; clear everything | Keeping Date lets several runs be backfilled for one day without retyping it; a fresh Time gives each run a distinct start time so Storage's uniqueness rule does not reject the next run. |
 | After an edit is saved | Reset the form and return to Run List with the edited run selected | Stay on Quick Entry; return to the top of Run List | The user confirms the change by seeing the run's new values in context, not by reading a message. |
 | Leaving Quick Entry mid-edit | Cancel the edit and reset the form | Keep the edit pending; prompt before leaving | An edit the user walked away from must never overwrite a run later without their noticing. |
+| Save-failure messages | Name the problem and the next step; a duplicate start time gets its own message | Generic "Database error" text | The user should know what went wrong and how to fix it without reading SQLite errors. |
 | Error reporting | First failing field only, inline in red | Collect all errors; modal popup | Fields are few and the message sits directly under them. |
 
 ## Open Questions & Future Decisions
@@ -122,6 +130,6 @@ Run logged successfully!              ← red error takes precedence over green 
 
 - Code: `src/app.rs`, `src/input/quick_entry.rs`, `src/logic/validation.rs`, `src/models/run.rs`, `src/ui/screens/quick_entry.rs`, `src/ui/theme.rs` (input/message styles)
 - Specs: `docs/intent/quick-entry/quick-entry-specs.md`
-- Tests: `src/logic/validation.rs` (inline), `src/input/tests.rs`
+- Tests: listed in `docs/arrows/quick-entry.md`
 - Depends on: Storage (`STORE`) for insert/update and the stored time format; Navigation (`NAV`) for key routing and the clear trigger; Run List (`RL`) for the edit hand-off and post-edit return
 - External: `chrono` 0.4, `anyhow` 1, `ratatui` 0.30, `crossterm` 0.29
