@@ -49,10 +49,13 @@ pub fn parse_distance(distance_str: &str) -> Result<f64> {
         return Err(anyhow!("Distance is required"));
     }
 
+    // f64 parsing accepts "NaN" and "inf"; neither is a distance.
     distance_str
         .trim()
         .parse::<f64>()
-        .map_err(|_| anyhow!("Invalid distance. Enter a number (e.g., 3.5)"))
+        .ok()
+        .filter(|d| d.is_finite())
+        .ok_or_else(|| anyhow!("Invalid distance. Enter a number (e.g., 3.5)"))
 }
 
 pub fn format_date(date: &NaiveDate) -> String {
@@ -102,6 +105,19 @@ mod tests {
         assert!(check_not_future(d, t, now()).is_ok());
         let (d, t) = at(2026, 10, 11, 23, 59);
         assert!(check_not_future(d, t, now()).is_ok());
+    }
+
+    // @spec QE-012
+    #[test]
+    fn non_finite_distances_are_invalid() {
+        for input in ["NaN", "nan", " NaN ", "inf", "-inf", "infinity"] {
+            let err = parse_distance(input).unwrap_err();
+            assert_eq!(
+                err.to_string(),
+                "Invalid distance. Enter a number (e.g., 3.5)",
+                "{input:?}"
+            );
+        }
     }
 
     // @spec QE-010

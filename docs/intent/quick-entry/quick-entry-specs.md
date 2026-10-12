@@ -2,7 +2,7 @@
 
 Design: `docs/intent/quick-entry/quick-entry-design.md` · Prefix: `QE`
 
-Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/logic/validation.rs` (QE-010, QE-024), `src/input/tests.rs` (QE-014, QE-016, QE-017, QE-018, QE-023, QE-024).
+Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = deferred. Tests: `src/logic/validation.rs` (QE-010, QE-012, QE-024), `src/models/run.rs` (QE-013), `src/input/tests.rs` (QE-014, QE-016, QE-017, QE-018, QE-023, QE-024).
 
 ## Form
 
@@ -20,8 +20,8 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 - [x] **QE-009**: When a Quick Entry submission is parsed, the system shall accept the Time in `HH:MM:SS`, `HH:MM`, `h:MM AM/PM` or `h:MM:SS AM/PM` form.
 - [x] **QE-010**: If the Time field is empty when a Quick Entry submission is parsed, then the system shall use the current local time truncated to whole seconds.
 - [x] **QE-011**: If the Date field of a Quick Entry submission matches no accepted form, then the system shall reject it with "Invalid date format. Use YYYY-MM-DD"; if the Time field matches no accepted form, then the system shall reject it with "Invalid time format. Use HH:MM or HH:MM:SS".
-- [x] **QE-012**: If the Distance field of a Quick Entry submission is empty, then the system shall reject it with "Distance is required"; if it is not a number after trimming surrounding whitespace, then the system shall reject it with "Invalid distance. Enter a number (e.g., 3.5)".
-- [x] **QE-013**: If a run's distance is zero or negative, then the system shall reject it with "Distance must be positive"; if it exceeds 200 miles, then the system shall reject it with "Distance seems unrealistic (>200 miles)".
+- [x] **QE-012**: If the Distance field of a Quick Entry submission is empty, then the system shall reject it with "Distance is required"; if it is not a finite number after trimming surrounding whitespace (including `NaN` and `inf`), then the system shall reject it with "Invalid distance. Enter a number (e.g., 3.5)".
+- [x] **QE-013**: If a run's distance is not a finite number, then the system shall reject it with "Invalid distance. Enter a number (e.g., 3.5)"; if it is zero or negative, then the system shall reject it with "Distance must be positive"; if it exceeds 200 miles, then the system shall reject it with "Distance seems unrealistic (>200 miles)".
 - [x] **QE-024**: If the date and time of a Quick Entry submission are after the current local date and time, then the system shall reject it with "Date cannot be in the future" when the date is after today, or with "Time cannot be in the future" when the date is today and the time is later than now.
 - [x] **QE-014**: When a Quick Entry submission has more than one invalid field, the system shall report only the first failure in the order Date format, Time format, not in the future (QE-024), Distance, distance bounds.
 

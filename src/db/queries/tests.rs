@@ -91,3 +91,17 @@ fn unreadable_value_is_quoted_with_control_characters_escaped() {
     assert!(err.contains("\"bad\\nvalue\""), "{err}");
     assert!(!err.contains('\n'), "{err}");
 }
+
+// @spec STORE-014
+#[test]
+fn startup_repair_leaves_other_malformed_values_alone() {
+    let conn = memory_db();
+    let garbage = insert_raw(&conn, "2026-10-01", "bad\nvalue", 1.0);
+    let suffixed = insert_raw(&conn, "2026-10-02", "07:00:00Z", 1.0);
+    let fractional = insert_raw(&conn, "2026-10-03", "11:51:04.165846", 1.0);
+    init_database(&conn).unwrap();
+
+    assert_eq!(raw_time(&conn, garbage), "bad\nvalue");
+    assert_eq!(raw_time(&conn, suffixed), "07:00:00Z");
+    assert_eq!(raw_time(&conn, fractional), "11:51:04");
+}

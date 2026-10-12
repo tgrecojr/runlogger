@@ -22,14 +22,15 @@ pub fn init_database(conn: &Connection) -> Result<()> {
     Ok(())
 }
 
-/// Rewrites start times stored with fractional seconds (by older versions) to
-/// whole seconds. A row whose rewrite would duplicate another run is left as is;
+/// Rewrites start times stored as `HH:MM:SS.<digits>` (by older versions) to
+/// whole seconds; any other malformed value is left for the read to report. A row whose rewrite would duplicate another run is left as is;
 /// a failed repair is ignored because reads tolerate fractional times.
 // @spec STORE-014
 fn repair_start_times(conn: &Connection) {
     let _ = conn.execute(
         "UPDATE OR IGNORE runs SET time_started = substr(time_started, 1, 8)
-         WHERE length(time_started) > 8",
+         WHERE time_started GLOB '[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9]*'
+           AND substr(time_started, 10) NOT GLOB '*[^0-9]*'",
         [],
     );
 }

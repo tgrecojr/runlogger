@@ -56,6 +56,13 @@ pub fn hundredths(miles: f64) -> i64 {
     (miles * 100.0).round() as i64
 }
 
+/// A distance as shown on screen: two decimals from the same hundredths
+/// `goal_met` uses, so the display and the goal status always agree.
+pub fn format_miles(miles: f64) -> String {
+    let h = hundredths(miles);
+    format!("{}.{:02} mi", h / 100, h % 100)
+}
+
 /// Whether a day's total meets the daily goal, judged at displayed precision.
 // @spec AN-001
 pub fn goal_met(total_miles: f64) -> bool {

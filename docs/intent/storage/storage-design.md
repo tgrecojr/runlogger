@@ -49,10 +49,11 @@ After the DDL, `repair_start_times` repairs start times written with fractional 
 
 ```sql
 UPDATE OR IGNORE runs SET time_started = substr(time_started, 1, 8)
- WHERE length(time_started) > 8;
+ WHERE time_started GLOB '[0-2][0-9]:[0-5][0-9]:[0-5][0-9].[0-9]*'
+   AND substr(time_started, 10) NOT GLOB '*[^0-9]*';
 ```
 
-No two runs may share a date and a whole-second start time (`STORE-005`). A collision during repair would require two runs submitted within the same second, which Quick Entry rules out by clearing Distance after every save; `OR IGNORE` is a safety net that leaves such a row unchanged and readable through the tolerant read below rather than aborting startup. If the repair statement fails for any reason, startup continues — the tolerant read keeps unrepaired rows usable. The statement matches no rows once a database is clean, so it is safe to run on every launch.
+The pattern matches only the shape older versions wrote — `HH:MM:SS`, a dot, and one or more digits — so any other malformed value is left untouched for the read to report with its id and value (`STORE-015`) rather than being silently truncated. No two runs may share a date and a whole-second start time (`STORE-005`). A collision during repair would require two runs submitted within the same second, which Quick Entry rules out by clearing Distance after every save; `OR IGNORE` is a safety net that leaves such a row unchanged and readable through the tolerant read below rather than aborting startup. If the repair statement fails for any reason, startup continues — the tolerant read keeps unrepaired rows usable. The statement matches no rows once a database is clean, so it is safe to run on every launch.
 
 ## Stored Formats
 
@@ -97,7 +98,7 @@ Uniqueness violations and other SQLite errors surface to the caller as `anyhow` 
 | Schema evolution | `CREATE ... IF NOT EXISTS` on every launch | Versioned migrations (`user_version` pragma, migration crate) | Only one schema version has ever existed. |
 | Read strategy | Load the entire table on each screen switch | Date-range queries; SQL aggregation for analytics | Data volume is tiny; in-memory computation keeps analytics logic in Rust and testable without SQL. |
 | Connection lifetime | One connection for the process, passed by reference | Open per operation; pool | Single-threaded event loop, single user. |
-| Start times written before whole-second storage | Tolerant read plus a startup repair that rewrites them to whole seconds | Tolerant read only; repair only | The repair brings stored data to the one canonical format; the tolerant read covers rows the repair must skip to avoid duplicates and any database the repair has not yet run on. |
+| Start times written before whole-second storage | Tolerant read plus a startup repair that rewrites `HH:MM:SS.<digits>` values to whole seconds | Tolerant read only; repair only; repair anything longer than 8 characters | The repair brings stored data to the one canonical format; the tolerant read covers rows the repair must skip to avoid duplicates and any database the repair has not yet run on. |
 | Unreadable rows | Fail the whole read with an error naming run id, field and value | Skip the row and warn | Streaks and totals computed from a partial history would be wrong without looking wrong; a precise error tells the user exactly which row to fix. |
 | Distance unit | Miles only, `REAL` | Store meters and convert for display | The goal and all UI are expressed in miles. |
 

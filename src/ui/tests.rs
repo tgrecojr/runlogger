@@ -140,6 +140,7 @@ fn analytics_screen(today_goal_met: bool) -> App {
     recent_trend[13].distance = 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1; // 06/15
     recent_trend[12].distance = 0.004; // 06/14
     recent_trend[11].distance = 0.5; // 06/13
+    recent_trend[10].distance = 0.995; // 06/12: shown and judged at the same precision
     let mut app = App::new();
     app.switch_to_screen(Screen::Analytics);
     app.analytics_state.analytics = Analytics {
@@ -296,4 +297,15 @@ fn help_describes_esc_commands_and_where_direct_keys_work() {
     assert!(help.contains("[Esc] then [h] or [?]"), "{help}");
     assert!(help.contains("not in Quick Entry"), "{help}");
     assert!(!help.contains("works from any screen"), "{help}");
+}
+
+// @spec AN-011, AN-001
+#[test]
+fn chart_distance_agrees_with_goal_status() {
+    let mut app = analytics_screen(true);
+    let buf = draw(&mut app);
+    let screen = text(&buf);
+    let line = screen.lines().find(|l| l.contains("06/12")).unwrap();
+    assert!(line.contains("1.00 mi"), "{line}");
+    assert_eq!(day_distance_cell(&buf, "06/12").fg, Color::Green);
 }
