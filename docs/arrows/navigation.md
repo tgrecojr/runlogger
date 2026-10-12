@@ -4,7 +4,7 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 
 ## Status
 
-**MAPPED** — mapped 2026-10-12; not yet audited. All 18 specs implemented.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`). All 18 specs verified against code; every header, footer and Help hint is true. Four specs are worded more broadly than the intended behavior.
 
 ## References
 
@@ -20,16 +20,12 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 ### Tests
 - src/input/tests.rs (NAV-017, NAV-018)
 - src/ui/tests.rs (NAV-013, NAV-014, NAV-016)
-- src/test_support.rs (shared test helpers)
 
 ### Code
-- src/main.rs (`main`, terminal helpers, `run_app`)
-- src/input/mod.rs (`handle_key_event`)
-- src/app.rs (`Screen`, `App`, `App::switch_to_screen`)
-- src/ui/mod.rs
-- src/ui/screens/help.rs
-- src/ui/theme.rs
-- src/ui/components/ (comment-only stubs)
+- src/input/mod.rs (NAV-005, NAV-006, NAV-007, NAV-008, NAV-009, NAV-010, NAV-011, NAV-012, NAV-017, NAV-018)
+- src/main.rs (NAV-001, NAV-002, NAV-003, NAV-004)
+- src/ui/mod.rs (NAV-013, NAV-014, NAV-016)
+- src/ui/screens/help.rs (NAV-015, NAV-016)
 
 ## Architecture
 
@@ -45,26 +41,29 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 
 ## Spec Coverage
 
-| Category | Spec IDs | Implemented | Deferred | Gaps |
-|----------|----------|-------------|----------|------|
-| Lifecycle | NAV-001 to NAV-004 | 4 | 0 | 0 |
-| Quitting | NAV-005 to NAV-006 | 2 | 0 | 0 |
-| Esc prefix | NAV-007 to NAV-010, NAV-018 | 5 | 0 | 0 |
-| Direct keys | NAV-011 to NAV-012 | 2 | 0 | 0 |
-| Shared chrome | NAV-013 to NAV-016 | 4 | 0 | 0 |
-| Failures | NAV-017 | 1 | 0 | 0 |
+| Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
+|----------|----------|-------------|----------|------|--------|
+| Lifecycle | NAV-001, NAV-002, NAV-003, NAV-004 | 4 | 0 | 0 | 0 |
+| Quitting | NAV-005, NAV-006 | 2 | 0 | 0 | 0 |
+| Esc Prefix | NAV-007, NAV-008, NAV-009, NAV-010, NAV-018 | 5 | 0 | 0 | 1 |
+| Direct Keys | NAV-011, NAV-012 | 2 | 0 | 0 | 0 |
+| Shared Chrome | NAV-013, NAV-014, NAV-015, NAV-016 | 4 | 0 | 0 | 3 |
+| Failures | NAV-017 | 1 | 0 | 0 | 1 |
 
-**Summary:** 18 of 18 specs implemented. Tests cite NAV-013, NAV-014, NAV-016, NAV-017 and NAV-018.
+**Summary:** 18 of 18 specs marked implemented; 5 of 18 cited by a test. Untested: NAV-001, NAV-002, NAV-003, NAV-004, NAV-005, NAV-006, NAV-007, NAV-008, NAV-009, NAV-010, NAV-011, NAV-012, NAV-015.
 
 ## Key Findings
 
-1. **Hard-coded data path in Help** — shows the macOS path even where `dirs::data_dir()` differs.
-2. **No Esc-prefix indicator** — after Esc nothing on screen shows that the next key is a command.
+1. **Spec wording** — NAV-004 promises a redraw "at least every 100 ms" but the loop waits up to 100 ms after each draw; NAV-010 ("ignore any other key after Esc") and NAV-012 ("every key goes to the form") don't except Ctrl+Q/Ctrl+C (NAV-005) and the key after Esc (NAV-007); NAV-015 promises "usage tips" and "the run database location", but tips are folded into other sections and the path shown is macOS-only.
+2. **Key presses only** — key events are not filtered to presses; on Windows, crossterm also reports releases, so each key could act twice.
+3. **Modifiers ignored** — Alt+1 / Ctrl+h switch screens off Quick Entry; Ctrl+letter types the letter on Quick Entry.
+4. **No Esc-prefix indicator.**
 
 ## Work Required
 
 ### Should Fix
-1. Add tests for key routing (NAV-005 to NAV-012) and lifecycle (NAV-001 to NAV-004).
+1. Reword NAV-004, NAV-010, NAV-012 and NAV-015 to match the intended behavior.
+2. Add tests for key routing (NAV-005 to NAV-012) and lifecycle (NAV-001 to NAV-004).
 
 ### Nice to Have
-2. Show an indicator while the Esc prefix is armed; show the real database path in Help; delete `ui/components` stubs; route inline colors through `theme.rs`.
+3. Filter key events to presses; show an Esc-prefix indicator; show the real database path in Help; delete `ui/components` stubs; route inline colors through `theme.rs`.
