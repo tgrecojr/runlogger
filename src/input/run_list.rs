@@ -4,25 +4,19 @@ use crate::db;
 use crossterm::event::{KeyCode, KeyEvent};
 use rusqlite::Connection;
 
-// @spec RL-006, RL-007, RL-008, RL-009, RL-010, RL-013
+// @spec RL-006, RL-008, RL-009, RL-010, RL-013
 pub(super) fn handle_run_list_input(app: &mut App, key: KeyEvent, conn: &Connection) {
     match key.code {
         KeyCode::Up => {
             let state = &mut app.run_list_state;
             if state.selected_index > 0 {
                 state.selected_index -= 1;
-                if state.selected_index < state.scroll_offset {
-                    state.scroll_offset = state.selected_index;
-                }
             }
         }
         KeyCode::Down => {
             let state = &mut app.run_list_state;
             if state.selected_index + 1 < state.runs.len() {
                 state.selected_index += 1;
-                if state.selected_index >= state.scroll_offset + 10 {
-                    state.scroll_offset = state.selected_index - 9;
-                }
             }
         }
         KeyCode::Char('e') => {

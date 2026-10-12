@@ -15,9 +15,9 @@ Code: `RunListState` in `src/app.rs`, `handle_run_list_input` in `src/input/run_
 
 ## State and Loading
 
-`RunListState` holds `runs: Vec<Run>`, `selected_index`, `scroll_offset` and `error_message: Option<String>`.
+`RunListState` holds `runs: Vec<Run>`, `selected_index`, `table_state` (ratatui's `TableState`, which carries the scroll position between frames) and `error_message: Option<String>`. `select_run(id)` selects the run with that id if it is in the list; Quick Entry uses it after an edit (`RL-011`).
 
-`load_runs` replaces `runs` with `get_all_runs` (newest first by date, then start time — `STORE-012`) and resets `selected_index` and `scroll_offset` to 0. It runs every time the screen is opened (Navigation calls it on `2` and Esc→`2`), after a delete, and after a Quick Entry edit is saved. There is no cache: the list always reflects the database at open time.
+`load_runs` replaces `runs` with `get_all_runs` (newest first by date, then start time — `STORE-012`) and resets `selected_index` to 0 and `table_state` to its default. It runs every time the screen is opened (Navigation calls it on `2` and Esc→`2`), after a delete, and after a Quick Entry edit is saved — in which case Quick Entry then calls `select_run` for the edited run. There is no cache: the list always reflects the database at open time.
 
 Storage failures stay on this screen and never end the app:
 
@@ -34,18 +34,16 @@ Handled by `handle_run_list_input` after Navigation's global keys:
 
 | Key | Effect |
 |---|---|
-| ↑ | Move selection up one row, stopping at the first; lower `scroll_offset` if the selection passes above it. |
-| ↓ | Move selection down one row, stopping at the last; raise `scroll_offset` once the selection is 10 or more rows past it. |
+| ↑ | Move selection up one row, stopping at the first. |
+| ↓ | Move selection down one row, stopping at the last. |
 | `e` | Clone the selected run, hand it to Quick Entry via `load_run` (`QE-022`), switch to Quick Entry. |
 | `d` | Delete the selected run by id immediately, no confirmation (`STORE-011`); reload; then clamp `selected_index` to the last row. If the delete fails, nothing is reloaded and the error is shown (`RL-013`). |
 
 `e` and `d` do nothing when the list is empty.
 
-**Divergence (scrolling).** `scroll_offset` is maintained with a hard-coded 10-row page, but `run_list.rs` never reads it: the `Table` is rendered without a `TableState`, so it always draws from the first row. Once the selection moves below the visible area it is highlighted off-screen and the user cannot see it (`RL-007`).
+Scrolling is left to ratatui: each frame the renderer sets `table_state`'s selection from `selected_index` and draws the table as a stateful widget, which moves the stored offset just enough to keep the selected row inside the rendered height (`RL-007`). Because `table_state` persists in `RunListState`, the view scrolls one row at a time in both directions rather than jumping. Rendering therefore takes the app state mutably. `load_runs` resets `table_state` along with the selection.
 
 **Divergence (selection after delete).** The clamp after the delete reload intends to keep the selection near where the deleted run was, but `load_runs` has already reset it to 0, so the selection always jumps to the newest run (`RL-010`).
-
-**Divergence (selection after an edit).** After Quick Entry saves an edit it reloads Run List, which selects the first row rather than the edited run (`RL-011`, the Run List half of `QE-017`).
 
 ## Display
 
@@ -69,6 +67,7 @@ Columns are fixed at 12/10/15 characters with Note taking the rest (min 20). Dis
 
 | Decision | Chosen | Alternatives Considered | Rationale |
 |---|---|---|---|
+| Scrolling | ratatui `TableState` persisted in `RunListState`; rendering takes state mutably | A fresh `TableState` each frame; a hand-computed offset with a fixed page size | Keeps the selection in view at any terminal height, and a persisted offset scrolls smoothly in both directions. |
 | How edits happen | Hand the run to the Quick Entry form | Inline cell editing; a separate edit dialog | One form keeps one set of parsing and validation rules. |
 | Delete confirmation | Delete immediately on `d` | Confirmation prompt; undo | A single-user personal log; deleting is rare and a mistaken delete is quickly re-entered in Quick Entry. |
 | Freshness | Reload from Storage every time the list opens or changes | Keep an in-memory list in sync with writes | Always matches the database with no synchronization logic; the history is small. |
@@ -78,8 +77,7 @@ Columns are fixed at 12/10/15 characters with Note taking the rest (min 20). Dis
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **Page size.** The scroll logic assumes 10 visible rows; the real height depends on the terminal. Scrolling should follow the rendered height (`RL-007`).
-2. **Hints are split.** The footer (`NAV`) shows `[↑↓] Navigate [1-3] Switch screen [h] Help [q] Quit` while the Actions panel shows `e`/`d`; neither lists everything available on the screen.
+1. **Hints are split.** The footer (`NAV`) shows `[↑↓] Navigate [1-3] Switch screen [h] Help [q] Quit` while the Actions panel shows `e`/`d`; neither lists everything available on the screen.
 
 ## References
 

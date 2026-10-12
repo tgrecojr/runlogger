@@ -47,7 +47,7 @@ Esc→`h` / Esc→`?` makes Help reachable from every screen, including Quick En
 
 **Divergence (Esc→Help).** The code has no `h`/`?` case after Esc (`handle_key_event`), so Help cannot be reached from Quick Entry without first switching elsewhere.
 
-**Divergence (leaving mid-edit).** Switching away from Quick Entry does not touch its edit mode; Quick Entry specifies that leaving cancels the edit (`QE-023`), which Navigation must trigger on every screen switch away from Quick Entry.
+Every screen change goes through `App::switch_to_screen`. When the target is Run List or Analytics and Quick Entry is in edit mode, it resets the Quick Entry form, cancelling the edit (`QE-023`) — whether the switch starts on Quick Entry or on Help. Switching to Help or to Quick Entry (Run List's `e`), and any switch while not editing, leave the form alone.
 
 Key handling never ends the app because of storage: `handle_key_event` returns nothing, and every storage failure it triggers is recorded on the screen that owns it (`RL-012`, `RL-013`, `AN-014`, `QE-020`). Switching to Run List or Analytics happens even when that screen's load fails, so the error is visible. Only terminal input/output errors in `run_app` (draw, poll, read) end the loop (`NAV-017`).
 

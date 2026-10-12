@@ -28,7 +28,7 @@ One person tracking their own daily-mile habit from a terminal they already have
 - Pace, heart rate, routes, or any per-run data beyond date, start time, distance and note.
 - Units other than miles.
 - A configurable daily goal; the goal is one mile.
-- Logging runs that have not happened yet (future dates).
+- Logging runs that have not happened yet (a date and time after now).
 
 ## Tenets
 

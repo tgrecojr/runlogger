@@ -4,7 +4,7 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 
 ## Status
 
-**MAPPED** — mapped 2026-10-12; not yet audited. Storage errors no longer end the app. Two gaps: key hints that misdescribe Quick Entry behavior (NAV-016) and no Esc→Help (NAV-018). Also triggers Quick Entry's edit cancel (QE-023), not yet wired.
+**MAPPED** — mapped 2026-10-12; not yet audited. Storage errors no longer end the app. Two gaps: key hints that misdescribe Quick Entry behavior (NAV-016) and no Esc→Help (NAV-018).
 
 ## References
 
@@ -24,7 +24,7 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 ### Code
 - src/main.rs (`main`, terminal helpers, `run_app`)
 - src/input/mod.rs (`handle_key_event`)
-- src/app.rs (`Screen`, `App`)
+- src/app.rs (`Screen`, `App`, `App::switch_to_screen`)
 - src/ui/mod.rs
 - src/ui/screens/help.rs
 - src/ui/theme.rs
@@ -58,19 +58,17 @@ The application shell: startup/shutdown, terminal ownership, event loop, key rou
 ## Key Findings
 
 1. **Hint drift** — Quick Entry footer advertises `[h] Help` and `[Esc] Clear` (`render_footer` in `src/ui/mod.rs`); Help claims `h` works everywhere (`src/ui/screens/help.rs`); README promises Esc→`h`, which is missing (NAV-016, NAV-018).
-2. **Edit mode survives screen switches** — nothing in `handle_key_event` cancels Quick Entry's edit (QE-023).
-3. **Function size** — `handle_key_event` is ~82 lines (limit 50).
+2. **Function size** — `handle_key_event` is ~82 lines (limit 50).
 
 ## Work Required
 
 ### Must Fix
-1. Trigger Quick Entry's edit cancel on every switch away from it (QE-023).
-2. Add Esc→`h`/`?` to open Help (NAV-018).
-3. Make footer and Help hints accurate (NAV-016); align README.
+1. Add Esc→`h`/`?` to open Help (NAV-018).
+2. Make footer and Help hints accurate (NAV-016); align README.
 
 ### Should Fix
-4. Split `handle_key_event` under the 50-line limit.
-5. Add tests for key routing (NAV-005 to NAV-012) against `App` state without a terminal.
+3. Split `handle_key_event` under the 50-line limit.
+4. Add tests for key routing (NAV-005 to NAV-012) against `App` state without a terminal.
 
 ### Nice to Have
-6. Show an indicator while the Esc prefix is armed; delete `ui/components` stubs; route inline colors through `theme.rs`; show the real database path in Help.
+5. Show an indicator while the Esc prefix is armed; delete `ui/components` stubs; route inline colors through `theme.rs`; show the real database path in Help.

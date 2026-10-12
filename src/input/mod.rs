@@ -1,6 +1,7 @@
 use crate::app::{App, Screen};
 use crate::{db, logic};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use ratatui::widgets::TableState;
 use rusqlite::Connection;
 
 mod quick_entry;
@@ -100,7 +101,7 @@ pub fn handle_key_event(app: &mut App, key: KeyEvent, conn: &Connection) {
 pub(super) fn load_runs(app: &mut App, conn: &Connection) {
     let state = &mut app.run_list_state;
     state.selected_index = 0;
-    state.scroll_offset = 0;
+    state.table_state = TableState::default();
     match db::queries::get_all_runs(conn) {
         Ok(runs) => {
             state.runs = runs;

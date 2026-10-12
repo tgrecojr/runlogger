@@ -4,7 +4,7 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 ## Status
 
-**MAPPED** — mapped 2026-10-12; not yet audited. Four gaps: future dates accepted (QE-024), Time not refreshed after an insert (QE-016), post-edit form reset and Run List selection (QE-017), and sticky edit mode (QE-023).
+**MAPPED** — mapped 2026-10-12; not yet audited. All 24 specs implemented.
 
 ## References
 
@@ -18,11 +18,11 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 - docs/intent/quick-entry/quick-entry-specs.md (24 specs)
 
 ### Tests
-- src/logic/validation.rs (inline; QE-010)
-- src/input/tests.rs (QE-018)
+- src/logic/validation.rs (inline; QE-010, QE-024)
+- src/input/tests.rs (QE-014, QE-016, QE-017, QE-018, QE-023, QE-024)
 
 ### Code
-- src/app.rs (`QuickEntryState`, `InputField`)
+- src/app.rs (`QuickEntryState`, `InputField`; edit cancel in `App::switch_to_screen`)
 - src/input/quick_entry.rs (`handle_quick_entry_input`, `submit`, `build_run`)
 - src/logic/validation.rs
 - src/models/run.rs (`Run::new`)
@@ -44,32 +44,23 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 | Category | Spec IDs | Implemented | Deferred | Gaps |
 |----------|----------|-------------|----------|------|
 | Form | QE-001 to QE-007 | 7 | 0 | 0 |
-| Parsing and validation | QE-008 to QE-014, QE-024 | 7 | 0 | 1 |
-| Submit | QE-015 to QE-021 | 6 | 0 | 1 |
-| Edit mode | QE-022 to QE-023 | 1 | 0 | 1 |
+| Parsing and validation | QE-008 to QE-014, QE-024 | 8 | 0 | 0 |
+| Submit | QE-015 to QE-021 | 7 | 0 | 0 |
+| Edit mode | QE-022 to QE-023 | 2 | 0 | 0 |
 
-**Summary:** 20 of 24 specs implemented; 4 gaps (QE-016, QE-017, QE-023, QE-024). Tests cite QE-010 and QE-018 only.
+**Summary:** 24 of 24 specs implemented. Tests cite QE-010, QE-014, QE-016, QE-017, QE-018, QE-023, QE-024.
 
 ## Key Findings
 
-1. **Time not refreshed after insert** — `submit` in `src/input/quick_entry.rs` keeps Time, so a second run collides with STORE-005 uniqueness (QE-016).
-2. **Sticky edit mode** — `editing_run_id` survives navigating away (`handle_key_event` never clears it); the next Enter overwrites the old run (QE-023).
-3. **Post-edit landing** — the form resets and Run List opens, but the edited run is not selected (QE-017, RL-011).
-4. **Future dates accepted** — `parse_date` has no upper bound (QE-024).
-5. **NaN distance passes app validation** — `Run::new` comparisons are false for NaN; storage outcome unverified.
+1. **NaN distance passes app validation** — `Run::new` comparisons are false for NaN; storage outcome unverified.
+2. **Date prefill across midnight** — Date is captured at startup and on clear, so a run logged after midnight without editing Date lands on the previous day.
 
 ## Work Required
 
-### Must Fix
-1. Refresh Time after an insert (QE-016).
-2. Cancel edit mode when leaving Quick Entry (QE-023).
-3. Select the edited run on the post-edit return (QE-017; RL owns selection in RL-011).
-4. Reject future dates (QE-024).
-
 ### Should Fix
-5. Decide whether Date refreshes across midnight.
-6. Reject non-finite distances explicitly.
-7. Add tests for the remaining QE specs (validation and `Run::new` are pure and easy to cover first).
+1. Decide whether Date refreshes across midnight.
+2. Reject non-finite distances explicitly.
+3. Add tests for the remaining QE specs (QE-001 to QE-009, QE-011 to QE-013, QE-015, QE-019 to QE-022).
 
 ### Nice to Have
-8. Make labels and error messages list every accepted format; treat whitespace-only Distance as empty.
+4. Make labels and error messages list every accepted format; treat whitespace-only Distance as empty.
