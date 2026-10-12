@@ -63,3 +63,7 @@ $RECYCLE.BIN/
 # Environment files
 .env
 .env.local
+
+# Claude local files
+.claude/settings.local.json
+CLAUDE.local.md

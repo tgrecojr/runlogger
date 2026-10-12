@@ -47,6 +47,7 @@ The header shows the key for each screen: on Quick Entry it shows the Esc form (
 - **Enter**: Save the run (or the changes, when editing)
 - **Esc → Esc**: Clear the form (this also cancels an edit)
 - Date and time are pre-filled; just enter a distance and optionally a note
+- Date keeps up with today (even past midnight) until you change it
 - After each save, Time resets to the current time, so the next run gets its own start time
 - Runs cannot be dated or timed in the future
 
@@ -155,7 +156,8 @@ Project structure:
 - `src/input/`: Key handling for each screen
 - `src/ui/`: User interface (screens, theme)
 - `src/app.rs`: Application state
-- `src/main.rs`: Entry point and event loop
+- `src/lifecycle.rs`: Startup, event loop, and terminal restore
+- `src/main.rs`: Entry point
 
 Design docs live in `docs/` (see `docs/high-level-design.md`); `AGENTS.md` describes the development workflow.
 

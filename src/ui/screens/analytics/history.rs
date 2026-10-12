@@ -91,11 +91,13 @@ pub(super) fn render_monthly_breakdown(f: &mut Frame, area: Rect, state: &Analyt
     for month_data in &state.analytics.monthly_breakdown {
         let month_str = format!("{} {}", month_abbrev(month_data.month), month_data.year);
 
-        let style = if month_data.total_distance >= 50.0 {
+        // Judge the color on the total as displayed (whole tenths of a mile).
+        let tenths = (month_data.total_distance * 10.0).round() as i64;
+        let style = if tenths >= 500 {
             Style::default()
                 .fg(Color::Green)
                 .add_modifier(Modifier::BOLD)
-        } else if month_data.total_distance >= 25.0 {
+        } else if tenths >= 250 {
             Style::default().fg(Color::Yellow)
         } else {
             Style::default().fg(Color::White)
@@ -106,7 +108,10 @@ pub(super) fn render_monthly_breakdown(f: &mut Frame, area: Rect, state: &Analyt
                 format!("{:<9}", month_str),
                 Style::default().fg(Color::Gray),
             ),
-            Span::styled(format!("{:>6.1} mi", month_data.total_distance), style),
+            Span::styled(
+                format!("{:>6} mi", format!("{}.{}", tenths / 10, tenths % 10)),
+                style,
+            ),
             Span::styled(
                 format!(
                     "  ({} runs, {:.1} avg)",

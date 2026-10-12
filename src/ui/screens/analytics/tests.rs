@@ -2,7 +2,7 @@
 
 use crate::app::{App, Screen};
 use crate::input::handle_key_event;
-use crate::models::analytics::Analytics;
+use crate::models::analytics::{Analytics, MonthlyData};
 use crate::test_support::{buffer_text, ch, draw_app, insert_raw, key, locate, memory_db};
 use crossterm::event::KeyCode;
 use ratatui::{
@@ -212,4 +212,48 @@ fn opening_analytics_recomputes_from_the_full_history_as_of_today() {
         "trend ends {trend_end}, not today"
     );
     assert!(buffer_text(&draw_app(&mut app, 100, 50)).contains("Total Runs: 2"));
+}
+
+fn month(month: u32, total: f64) -> MonthlyData {
+    MonthlyData {
+        year: 2025,
+        month,
+        total_distance: total,
+        run_count: 10,
+        average_distance: total / 10.0,
+    }
+}
+
+// @spec AN-012
+#[test]
+fn month_colors_follow_the_displayed_total() {
+    let buf = draw_analytics(Analytics {
+        monthly_breakdown: vec![month(6, 49.96), month(5, 24.96), month(4, 24.94)],
+        ..Analytics::empty()
+    });
+    let screen = buffer_text(&buf);
+    let total_cell = |label: &str| {
+        let (x, y) = locate(&buf, label);
+        let line: Vec<char> = screen.lines().nth(y as usize).unwrap().chars().collect();
+        let offset = (x as usize..line.len())
+            .find(|&i| line[i].is_ascii_digit() && i > x as usize + 8)
+            .unwrap();
+        (
+            line[offset..offset + 4].iter().collect::<String>(),
+            buf[(offset as u16, y)].clone(),
+        )
+    };
+
+    let (june, june_cell) = total_cell("Jun 2025");
+    assert_eq!(june, "50.0");
+    assert_eq!(
+        (june_cell.fg, june_cell.modifier.contains(Modifier::BOLD)),
+        (Color::Green, true)
+    );
+    let (may, may_cell) = total_cell("May 2025");
+    assert_eq!(may, "25.0");
+    assert_eq!(may_cell.fg, Color::Yellow);
+    let (april, april_cell) = total_cell("Apr 2025");
+    assert_eq!(april, "24.9");
+    assert_eq!(april_cell.fg, Color::White);
 }

@@ -3,6 +3,7 @@ use crate::test_support::{block_writes, ch, insert_raw, key, memory_db};
 
 mod edits;
 mod errors;
+mod key_events;
 mod routing;
 
 fn press(app: &mut App, conn: &Connection, keys: &[KeyEvent]) {

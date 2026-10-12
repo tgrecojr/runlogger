@@ -28,6 +28,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 
 - [x] **NAV-011**: While a screen other than Quick Entry is shown, when the user presses `1`, `2` or `3`, the system shall switch to the Quick Entry, Run List or Analytics screen respectively, loading the Run List or Analytics data on the switch; when the user presses `h` or `?`, the system shall show the Help screen.
 - [x] **NAV-012**: While the Quick Entry screen is shown, the system shall send every key to the Quick Entry form except Ctrl+Q and Ctrl+C (NAV-005), Esc, and the key that follows Esc (NAV-007).
+- [x] **NAV-019**: The system shall act on key presses and key repeats only, ignoring key-release events on every screen.
 
 ## Shared Chrome
 

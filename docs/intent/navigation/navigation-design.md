@@ -13,21 +13,29 @@ The central constraint is that Quick Entry must accept *any* typed character, in
 
 Navigation owns: startup and shutdown order, terminal setup/restore and the panic hook, the event loop, global key routing (quit keys, the Esc prefix, direct screen keys), the `App`/`Screen` state, the header, the footer, the Help screen, and `theme.rs`. It triggers, but does not own, each screen's data load (`RL-001`, `AN-008`), Quick Entry's clear (`QE-007`) and edit cancel (`QE-023`).
 
-Code: `src/main.rs` (`main`, terminal helpers, `run_app`), `handle_key_event` in `src/input/mod.rs`, `Screen` and `App` in `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`, `src/ui/components/*`.
+Code: `src/main.rs` (`main`), `src/lifecycle.rs` (`start`, `with_restore`, `install_panic_hook`, `run_app`, `EventSource`), `handle_key_event` in `src/input/mod.rs`, `Screen` and `App` in `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`, `src/ui/components/*`.
 
 ## Lifecycle
 
 ```
 main
- ├─ setup_panic_hook        restore terminal before the default panic output
- ├─ get_db_path, init_db    (STORE) — fails here print to a normal terminal
- ├─ setup_terminal          raw mode + alternate screen
- ├─ App::new                screen = QuickEntry
- ├─ run_app                 loop { draw; poll 100 ms; handle key; break on should_quit }
- └─ restore_terminal        leave raw mode + alternate screen, show cursor
+ ├─ install_panic_hook(restore)   restore terminal before the original panic output
+ ├─ start(open_db, enter_terminal)  database first (STORE), then raw mode + alternate screen
+ ├─ App::new                      screen = QuickEntry
+ └─ with_restore(run_app, restore)  restore runs whether run_app returns Ok or Err
+      run_app: loop { app.tick(today); draw; next_event(≤100 ms); handle key; break on should_quit }
 ```
 
-The database is opened before the terminal enters raw mode, so startup failures are readable. The panic hook disables raw mode and leaves the alternate screen, then chains to the original hook. `run_app` draws, then waits up to 100 ms for input, so the screen redraws after every key and at roughly 100 ms intervals while idle; a terminal input/output error breaks the loop and exits after restoring the terminal.
+The lifecycle lives in `src/lifecycle.rs`, with every side effect passed in so tests can check order and guarantees without a real terminal:
+
+| Function | Contract |
+|---|---|
+| `start(open_db, enter_terminal)` | Calls `open_db` first; calls `enter_terminal` only if it succeeded, so a startup failure prints to a normal terminal (`NAV-001`). |
+| `with_restore(body, restore)` | Runs `body`, then always runs `restore` — leave raw mode, leave the alternate screen, show the cursor — returning `body`'s error if any (`NAV-002`). |
+| `install_panic_hook(restore)` | Wraps the current panic hook so `restore` runs before the original hook prints the panic (`NAV-003`). |
+| `run_app(terminal, app, conn, events)` | Generic over the ratatui `Backend` and an `EventSource` (`next_event(timeout)`); each iteration ticks the app clock, draws, then waits at most 100 ms for an event, so the screen redraws after every key and about every 100 ms while idle (`NAV-004`). Production uses `CrosstermEvents` (crossterm `poll` + `read`); tests use `TestBackend` and scripted events. |
+
+Key-release events are dropped before routing (`NAV-019`): crossterm reports releases on Windows, and acting on them would apply every key twice. Presses and repeats (a held key) are handled.
 
 ## Key Routing
 
@@ -78,6 +86,8 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 | Startup order | Open the database before entering raw mode | Terminal first | Startup errors print to a normal terminal instead of a garbled alternate screen. |
 | Panic safety | Panic hook restores the terminal | Rely on normal exit | A crash never leaves the user's shell in raw mode. |
 | Event loop | Single-threaded, 100 ms poll, redraw every iteration | Async runtime; redraw only on events | Simple and responsive enough for a keyboard-driven form. |
+| Testable lifecycle | Side effects passed into `start`, `with_restore`, `install_panic_hook` and `run_app` | Leave lifecycle in `main` untested; integration tests in a pseudo-terminal | Startup order, terminal restore and redraw cadence can be unit-tested without a real terminal, at the cost of a little indirection in `main`. |
+| Key-release events | Ignored | Act on every key event | Windows reports both press and release; acting on releases would double every key. |
 | Failure policy | Screen-level errors are shown on that screen; only quit commands and terminal failures end the app | Exit on any error | A storage problem must not cost the user the rest of the app. |
 | Header keys on Quick Entry | Show the Esc form (`[Esc 1]` …) on Quick Entry, the direct form elsewhere | Same labels everywhere; treat the header as a screen map only | The header is read as key hints; on Quick Entry the direct keys type text, so only the Esc form is true there. |
 | Footer length | Compact hints that fit an 80-column terminal; the Help screen explains in full | Descriptive hints that clip below ~105 columns | A clipped hint is a hidden hint; the footer is a reminder, Help is the reference. |
@@ -93,7 +103,7 @@ Key handling never ends the app because of storage: `handle_key_event` returns n
 
 ## References
 
-- Code: `src/main.rs`, `src/input/mod.rs`, `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`, `src/ui/components/*`
+- Code: `src/main.rs`, `src/lifecycle.rs`, `src/input/mod.rs`, `src/app.rs`, `src/ui/mod.rs`, `src/ui/screens/help.rs`, `src/ui/theme.rs`, `src/ui/components/*`
 - Specs: `docs/intent/navigation/navigation-specs.md`
 - Tests: listed in `docs/arrows/navigation.md`
 - Triggers: Storage startup (`STORE-001`), Run List load (`RL-001`), Analytics load (`AN-008`), Quick Entry clear (`QE-007`) and edit cancel (`QE-023`)

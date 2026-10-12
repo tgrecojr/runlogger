@@ -1,6 +1,6 @@
 use crate::app::{App, Screen};
 use crate::{db, logic};
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::widgets::TableState;
 use rusqlite::Connection;
 
@@ -11,8 +11,12 @@ mod tests;
 
 /// Applies one key press. Storage failures are recorded on the screen that owns
 /// them, so no key press can end the app except a quit command.
-// @spec NAV-005, NAV-007, NAV-012, NAV-017
+// @spec NAV-005, NAV-007, NAV-012, NAV-017, NAV-019
 pub fn handle_key_event(app: &mut App, key: KeyEvent, conn: &Connection) {
+    // Windows also reports releases; acting on them would apply every key twice.
+    if key.kind == KeyEventKind::Release {
+        return;
+    }
     if is_quit_chord(key) {
         app.quit();
         return;

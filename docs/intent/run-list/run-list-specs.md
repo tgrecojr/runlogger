@@ -10,7 +10,7 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 
 ## Display
 
-- [x] **RL-002**: While the run history is not empty, the Run List screen shall show a table titled "Run List (N runs)", where N is the number of runs, with columns Date (`YYYY-MM-DD`), Time (`HH:MM:SS`), Distance (mi) to two decimal places, and Note (blank when the run has none).
+- [x] **RL-002**: While the run history is not empty, the Run List screen shall show a table titled "Run List (N runs)", where N is the number of runs ("Run List (1 run)" when there is exactly one), with columns Date (`YYYY-MM-DD`), Time (`HH:MM:SS`), Distance (mi) to two decimal places, and Note (blank when the run has none).
 - [x] **RL-003**: The Run List screen shall show the selected run's row in bold yellow.
 - [x] **RL-004**: While the run history has loaded successfully and is empty, the Run List screen shall show "No runs logged yet. Press Esc → 1 to add a run." in place of the table.
 - [x] **RL-005**: The Run List screen shall show an Actions panel below the table listing `[↑↓] Navigate`, `[e] Edit`, `[d] Delete` and `[Esc→1/2/3] Switch screens`, whether or not the history is empty.
@@ -29,5 +29,5 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 
 ## Errors
 
-- [x] **RL-012**: If loading the run history for the Run List screen fails — when the screen is opened, after a Quick Entry edit is saved, or after a delete — then the system shall show the Run List screen with no runs and, above the table in bold red, "Could not load runs: " followed by the reason including its underlying cause, until the next successful load, and shall keep the app running.
-- [x] **RL-013**: If deleting a run from the Run List screen fails, then the system shall leave the list and selection unchanged and show, above the table in bold red, "Could not delete run: " followed by the reason including its underlying cause, until the next successful load, and shall keep the app running.
+- [x] **RL-012**: If loading the run history for the Run List screen fails — when the screen is opened, after a Quick Entry edit is saved, or after a delete — then the system shall show the Run List screen with no runs and, above the table in bold red, "Could not load runs: " followed by the reason including its underlying cause, wrapped across as many lines as it needs, until the next successful load, and shall keep the app running.
+- [x] **RL-013**: If deleting a run from the Run List screen fails, then the system shall leave the list and selection unchanged and show, above the table in bold red, "Could not delete run: " followed by the reason including its underlying cause, wrapped across as many lines as it needs, until the next successful load, and shall keep the app running.

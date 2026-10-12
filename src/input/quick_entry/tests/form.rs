@@ -142,3 +142,50 @@ fn esc_esc_clears_the_form_and_leaves_edit_mode() {
     assert_eq!(state.success_message, None);
     assert_eq!(state.editing_run_id, None);
 }
+
+fn day(y: i32, m: u32, d: u32) -> NaiveDate {
+    NaiveDate::from_ymd_opt(y, m, d).unwrap()
+}
+
+// @spec QE-025
+#[test]
+fn untouched_date_follows_the_clock() {
+    let mut app = App::new();
+    app.quick_entry_state.date = "2026-10-11".into(); // prefilled yesterday
+    app.tick(day(2026, 10, 12));
+    assert_eq!(app.quick_entry_state.date, "2026-10-12");
+}
+
+// @spec QE-025
+#[test]
+fn edited_date_stays_put() {
+    let conn = memory_db();
+    let mut app = App::new();
+    // Distance -> Time -> Date
+    press(
+        &mut app,
+        &conn,
+        &[key(KeyCode::BackTab), key(KeyCode::BackTab)],
+    );
+    assert_eq!(app.quick_entry_state.focused_field, InputField::Date);
+    press(&mut app, &conn, &[key(KeyCode::Backspace)]);
+    type_text(&mut app, &conn, "1");
+    let typed = app.quick_entry_state.date.clone();
+    app.tick(day(2030, 1, 1));
+    assert_eq!(app.quick_entry_state.date, typed);
+}
+
+// @spec QE-025
+#[test]
+fn editing_a_run_keeps_its_date_and_clear_resumes_following() {
+    let conn = memory_db();
+    insert_raw(&conn, "2026-01-05", "07:00:00", 2.0);
+    let mut app = App::new();
+    press(&mut app, &conn, &[key(KeyCode::Esc), ch('2'), ch('e')]);
+    app.tick(day(2026, 10, 12));
+    assert_eq!(app.quick_entry_state.date, "2026-01-05");
+
+    press(&mut app, &conn, &[key(KeyCode::Esc), key(KeyCode::Esc)]);
+    app.tick(day(2030, 1, 1));
+    assert_eq!(app.quick_entry_state.date, "2030-01-01");
+}

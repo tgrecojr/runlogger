@@ -1,7 +1,7 @@
 use crate::logic::validation;
 use crate::models::analytics::Analytics;
 use crate::models::run::Run;
-use chrono::Local;
+use chrono::{Local, NaiveDate};
 use ratatui::widgets::TableState;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -29,6 +29,9 @@ pub struct QuickEntryState {
     pub error_message: Option<String>,
     pub success_message: Option<String>,
     pub editing_run_id: Option<i64>,
+    /// The user has typed in Date (or a run was loaded for editing), so Date
+    /// no longer follows the clock.
+    pub date_edited: bool,
 }
 
 impl QuickEntryState {
@@ -44,6 +47,7 @@ impl QuickEntryState {
             error_message: None,
             success_message: None,
             editing_run_id: None,
+            date_edited: false,
         }
     }
 
@@ -58,9 +62,36 @@ impl QuickEntryState {
         self.error_message = None;
         self.success_message = None;
         self.editing_run_id = None;
+        self.date_edited = false;
     }
 
     // @spec QE-022
+    /// Keeps an unedited Date showing today, so a form left open past
+    /// midnight logs to the new day.
+    // @spec QE-025
+    pub fn follow_clock(&mut self, today: NaiveDate) {
+        if !self.date_edited {
+            self.date = validation::format_date(&today);
+        }
+    }
+
+    /// Typing or deleting in Date stops it following the clock.
+    fn note_edit(&mut self) {
+        if self.focused_field == InputField::Date {
+            self.date_edited = true;
+        }
+    }
+
+    pub fn type_char(&mut self, c: char) {
+        self.note_edit();
+        self.current_input_mut().push(c);
+    }
+
+    pub fn delete_char(&mut self) {
+        self.note_edit();
+        self.current_input_mut().pop();
+    }
+
     pub fn load_run(&mut self, run: &Run) {
         self.date = validation::format_date(&run.date);
         self.time = validation::format_time(&run.time_started);
@@ -70,6 +101,7 @@ impl QuickEntryState {
         self.error_message = None;
         self.success_message = None;
         self.editing_run_id = run.id;
+        self.date_edited = true;
     }
 
     pub fn is_editing(&self) -> bool {
@@ -175,6 +207,11 @@ impl App {
             self.quick_entry_state.clear();
         }
         self.screen = screen;
+    }
+
+    /// Called before every frame with today's date.
+    pub fn tick(&mut self, today: NaiveDate) {
+        self.quick_entry_state.follow_clock(today);
     }
 
     pub fn quit(&mut self) {

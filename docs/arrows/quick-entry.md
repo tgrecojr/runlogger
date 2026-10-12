@@ -4,7 +4,7 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then QE-012, QE-013 and QE-020 were changed and tested. All 24 specs implemented and tested.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then QE-012, QE-013, QE-020 and QE-025 were changed and tested. All 25 specs implemented and tested.
 
 ## References
 
@@ -15,10 +15,10 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 - docs/intent/quick-entry/quick-entry-design.md
 
 ### EARS
-- docs/intent/quick-entry/quick-entry-specs.md (24 specs)
+- docs/intent/quick-entry/quick-entry-specs.md (25 specs)
 
 ### Tests
-- src/input/quick_entry/tests/form.rs (QE-001, QE-002, QE-003, QE-004, QE-007)
+- src/input/quick_entry/tests/form.rs (QE-001, QE-002, QE-003, QE-004, QE-007, QE-025)
 - src/input/quick_entry/tests/submit.rs (QE-008, QE-011, QE-015, QE-019, QE-020, QE-022)
 - src/input/tests/edits.rs (QE-014, QE-016, QE-017, QE-023, QE-024)
 - src/input/tests/errors.rs (QE-018)
@@ -27,7 +27,7 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 - src/ui/screens/quick_entry/tests.rs (QE-005, QE-006, QE-021)
 
 ### Code
-- src/app.rs (QE-001, QE-007, QE-022, QE-023)
+- src/app.rs (QE-001, QE-007, QE-022, QE-023, QE-025)
 - src/input/quick_entry.rs (QE-002, QE-003, QE-004, QE-014, QE-015, QE-016, QE-017, QE-018, QE-019, QE-020, QE-024)
 - src/logic/validation.rs (QE-008, QE-009, QE-010, QE-011, QE-012, QE-024)
 - src/models/run.rs (QE-013)
@@ -48,22 +48,18 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 | Category | Spec IDs | Implemented | Deferred | Gaps | Tested |
 |----------|----------|-------------|----------|------|--------|
-| Form | QE-001, QE-002, QE-003, QE-004, QE-005, QE-006, QE-007 | 7 | 0 | 0 | 7 |
+| Form | QE-001, QE-002, QE-003, QE-004, QE-005, QE-006, QE-007, QE-025 | 8 | 0 | 0 | 8 |
 | Parsing and Validation | QE-008, QE-009, QE-010, QE-011, QE-012, QE-013, QE-024, QE-014 | 8 | 0 | 0 | 8 |
 | Submit | QE-015, QE-016, QE-017, QE-018, QE-019, QE-020, QE-021 | 7 | 0 | 0 | 7 |
 | Edit Mode | QE-022, QE-023 | 2 | 0 | 0 | 2 |
 
-**Summary:** 24 of 24 specs marked implemented; 24 of 24 cited by a test. Untested: none.
+**Summary:** 25 of 25 specs marked implemented; 25 of 25 cited by a test. Untested: none.
 
 ## Key Findings
 
 1. **Date not normalized after a save** — Date is kept exactly as typed (e.g. `10/12/2026`); Date and Time are not trimmed, so surrounding spaces make them invalid. Not covered by a spec.
-2. **Date prefill across midnight** — the Date field is captured at startup and on clear.
 
 ## Work Required
 
-### Should Fix
-1. Decide whether Date refreshes across midnight.
-
 ### Nice to Have
-2. Make labels and error messages list every accepted format; trim Date/Time; treat whitespace-only Distance as empty.
+1. Make labels and error messages list every accepted format; trim Date/Time; treat whitespace-only Distance as empty.
