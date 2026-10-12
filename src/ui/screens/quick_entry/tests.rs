@@ -24,8 +24,8 @@ fn form_app() -> App {
 fn fields_are_labeled() {
     let text = buffer_text(&draw(&mut form_app()));
     for label in [
-        "Date (YYYY-MM-DD)",
-        "Time (HH:MM:SS)",
+        "Date (YYYY-MM-DD or MM/DD/YYYY)",
+        "Time (HH:MM or h:MM AM/PM)",
         "Distance (miles)",
         "Note (optional)",
     ] {

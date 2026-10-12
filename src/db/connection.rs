@@ -31,7 +31,14 @@ pub fn open_connection(db_path: &PathBuf) -> Result<Connection> {
 // @spec STORE-001, STORE-002, STORE-003
 pub fn init_db(db_path: &PathBuf) -> Result<Connection> {
     let conn = open_connection(db_path)?;
-    crate::db::migrations::init_database(&conn).context("Failed to initialize database")?;
+    crate::db::migrations::init_database(&conn).map_err(|e| {
+        // A newer-schema refusal already says what happened; keep it on top.
+        if e.is::<crate::db::queries::StorageError>() {
+            e
+        } else {
+            e.context("Failed to initialize database")
+        }
+    })?;
     Ok(conn)
 }
 

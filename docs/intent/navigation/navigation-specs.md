@@ -34,7 +34,8 @@ Status: `[x]` = implemented; `[ ]` = specified but not yet implemented; `[D]` = 
 
 - [x] **NAV-013**: The system shall show a header titled "Run Logger" listing the Quick Entry, Run List, Analytics and Help screens with the key that opens each — `[Esc 1]`, `[Esc 2]`, `[Esc 3]` and `[Esc h]` while the Quick Entry screen is shown, and `[1]`, `[2]`, `[3]` and `[h]` on every other screen — with the current screen's tab in bold yellow and the others in gray.
 - [x] **NAV-014**: The system shall show a footer with a line of key hints specific to the current screen, short enough to show in full within the footer border on an 80-column terminal.
-- [x] **NAV-015**: The Help screen shall describe the navigation keys, the Quick Entry keys and behavior, the Run List keys, the 1-mile daily goal and streak rule, and the macOS location of the run database.
+- [x] **NAV-020**: While the key after Esc is awaited, the system shall replace the footer with the available Esc commands in bold cyan: "Esc → [1] Quick Entry  [2] Run List  [3] Analytics  [h] Help  [Esc] Clear" on the Quick Entry screen, and the same without "[Esc] Clear" on every other screen.
+- [x] **NAV-015**: The Help screen shall describe the navigation keys, the Quick Entry keys and behavior, the Run List keys, the 1-mile daily goal and streak rule, and the full path of the run database the app is using.
 - [x] **NAV-016**: Every key hint shown in the header, the footer and on the Help screen shall describe what that key actually does on the screen it is shown for.
 
 ## Failures

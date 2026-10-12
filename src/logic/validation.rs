@@ -3,6 +3,7 @@ use chrono::{Local, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 
 // @spec QE-008, QE-011
 pub fn parse_date(date_str: &str) -> Result<NaiveDate> {
+    let date_str = date_str.trim();
     if date_str.is_empty() {
         return Ok(Local::now().naive_local().date());
     }
@@ -10,11 +11,12 @@ pub fn parse_date(date_str: &str) -> Result<NaiveDate> {
     NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
         .or_else(|_| NaiveDate::parse_from_str(date_str, "%m/%d/%Y"))
         .or_else(|_| NaiveDate::parse_from_str(date_str, "%m-%d-%Y"))
-        .map_err(|_| anyhow!("Invalid date format. Use YYYY-MM-DD"))
+        .map_err(|_| anyhow!("Invalid date. Use YYYY-MM-DD, MM/DD/YYYY or MM-DD-YYYY"))
 }
 
 // @spec QE-009, QE-010, QE-011
 pub fn parse_time(time_str: &str) -> Result<NaiveTime> {
+    let time_str = time_str.trim();
     if time_str.is_empty() {
         return Ok(current_time());
     }
@@ -23,7 +25,7 @@ pub fn parse_time(time_str: &str) -> Result<NaiveTime> {
         .or_else(|_| NaiveTime::parse_from_str(time_str, "%H:%M"))
         .or_else(|_| NaiveTime::parse_from_str(time_str, "%I:%M %p"))
         .or_else(|_| NaiveTime::parse_from_str(time_str, "%I:%M:%S %p"))
-        .map_err(|_| anyhow!("Invalid time format. Use HH:MM or HH:MM:SS"))
+        .map_err(|_| anyhow!("Invalid time. Use HH:MM, HH:MM:SS or h:MM AM/PM"))
 }
 
 // @spec QE-024
@@ -45,13 +47,13 @@ pub fn current_time() -> NaiveTime {
 
 // @spec QE-012
 pub fn parse_distance(distance_str: &str) -> Result<f64> {
+    let distance_str = distance_str.trim();
     if distance_str.is_empty() {
         return Err(anyhow!("Distance is required"));
     }
 
     // f64 parsing accepts "NaN" and "inf"; neither is a distance.
     distance_str
-        .trim()
         .parse::<f64>()
         .ok()
         .filter(|d| d.is_finite())
@@ -176,7 +178,7 @@ mod tests {
             let err = parse_date(input).unwrap_err();
             assert_eq!(
                 err.to_string(),
-                "Invalid date format. Use YYYY-MM-DD",
+                "Invalid date. Use YYYY-MM-DD, MM/DD/YYYY or MM-DD-YYYY",
                 "{input:?}"
             );
         }
@@ -189,9 +191,31 @@ mod tests {
             let err = parse_time(input).unwrap_err();
             assert_eq!(
                 err.to_string(),
-                "Invalid time format. Use HH:MM or HH:MM:SS",
+                "Invalid time. Use HH:MM, HH:MM:SS or h:MM AM/PM",
                 "{input:?}"
             );
         }
+    }
+
+    // @spec QE-008, QE-009
+    #[test]
+    fn spaces_around_date_and_time_are_ignored() {
+        assert_eq!(
+            parse_date("  2026-10-01 ").unwrap(),
+            NaiveDate::from_ymd_opt(2026, 10, 1).unwrap()
+        );
+        assert_eq!(
+            parse_time(" 7:15 AM  ").unwrap(),
+            NaiveTime::from_hms_opt(7, 15, 0).unwrap()
+        );
+    }
+
+    // @spec QE-012
+    #[test]
+    fn distance_of_only_spaces_is_required() {
+        assert_eq!(
+            parse_distance("   ").unwrap_err().to_string(),
+            "Distance is required"
+        );
     }
 }

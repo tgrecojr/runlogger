@@ -1,13 +1,15 @@
 use crate::models::run::Run;
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDate, NaiveTime, Timelike, Utc};
-use rusqlite::{params, Connection, Params};
+use rusqlite::{params, types::Value, Connection, Params};
 
 /// Storage failures callers need to tell apart from generic SQLite errors.
 #[derive(Debug, thiserror::Error)]
 pub enum StorageError {
     #[error("Another run already starts at {date} {time}")]
     DuplicateStart { date: NaiveDate, time: NaiveTime },
+    #[error("This database was written by a newer version of Run Logger (schema {found}; this version supports {supported})")]
+    NewerSchema { found: i64, supported: i64 },
 }
 
 const DATE_FORMAT: &str = "%Y-%m-%d";
@@ -87,7 +89,7 @@ struct StoredRun {
     id: i64,
     date: String,
     time_started: String,
-    distance_miles: f64,
+    distance_miles: Value,
     note: Option<String>,
     created_at: String,
 }
@@ -126,12 +128,21 @@ fn to_run(row: StoredRun) -> Result<Run> {
     let created_at = DateTime::parse_from_rfc3339(&row.created_at)
         .map_err(|_| unreadable("creation timestamp", &row.created_at))?
         .with_timezone(&Utc);
+    let distance_miles = match &row.distance_miles {
+        Value::Real(miles) => *miles,
+        Value::Integer(miles) => *miles as f64,
+        Value::Text(text) => return Err(unreadable("distance", text)),
+        Value::Null => return Err(unreadable("distance", "NULL")),
+        Value::Blob(bytes) => {
+            return Err(unreadable("distance", &format!("<{} bytes>", bytes.len())))
+        }
+    };
 
     Ok(Run {
         id: Some(id),
         date,
         time_started,
-        distance_miles: row.distance_miles,
+        distance_miles,
         note: row.note,
         created_at,
     })

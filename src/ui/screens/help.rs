@@ -7,7 +7,7 @@ use ratatui::{
 };
 
 // @spec NAV-015, NAV-016
-pub fn render(f: &mut Frame, area: Rect) {
+pub fn render(f: &mut Frame, area: Rect, db_location: Option<&str>) {
     let mut help_text = vec![
         Line::from(""),
         heading(
@@ -23,7 +23,7 @@ pub fn render(f: &mut Frame, area: Rect) {
         quick_entry(),
         run_list(),
         goal(),
-        data_location(),
+        data_location(db_location),
     ] {
         help_text.extend(section);
         help_text.push(Line::from(""));
@@ -100,9 +100,10 @@ fn goal() -> Vec<Line<'static>> {
     lines
 }
 
-fn data_location() -> Vec<Line<'static>> {
-    section(
-        "Data Location:",
-        &["  ~/Library/Application Support/runlogger/runs.db (macOS)"],
-    )
+/// The database actually in use, as opened at startup.
+fn data_location(db_location: Option<&str>) -> Vec<Line<'static>> {
+    vec![
+        heading("Data Location:", Style::default().fg(Color::Cyan)),
+        Line::from(format!("  {}", db_location.unwrap_or("(not opened)"))),
+    ]
 }

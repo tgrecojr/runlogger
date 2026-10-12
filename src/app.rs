@@ -166,6 +166,8 @@ impl RunListState {
 pub struct AnalyticsState {
     pub analytics: Analytics,
     pub error_message: Option<String>,
+    /// The date `analytics` was computed for.
+    pub computed_for: Option<NaiveDate>,
 }
 
 impl AnalyticsState {
@@ -173,6 +175,7 @@ impl AnalyticsState {
         Self {
             analytics: Analytics::empty(),
             error_message: None,
+            computed_for: None,
         }
     }
 }
@@ -184,6 +187,8 @@ pub struct App {
     pub run_list_state: RunListState,
     pub analytics_state: AnalyticsState,
     pub waiting_for_nav: bool,
+    /// Full path of the open database, shown on the Help screen.
+    pub db_location: Option<String>,
 }
 
 impl App {
@@ -195,6 +200,7 @@ impl App {
             run_list_state: RunListState::new(),
             analytics_state: AnalyticsState::new(),
             waiting_for_nav: false,
+            db_location: None,
         }
     }
 

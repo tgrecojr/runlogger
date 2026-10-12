@@ -4,7 +4,7 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 ## Status
 
-**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then QE-012, QE-013, QE-020 and QE-025 were changed and tested. All 25 specs implemented and tested.
+**AUDITED** — audited 2026-10-12 (git SHA `88de5b9`); since then save errors, Date following the clock, input trimming and format labels landed with tests. All 25 specs implemented and tested.
 
 ## References
 
@@ -19,7 +19,7 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 ### Tests
 - src/input/quick_entry/tests/form.rs (QE-001, QE-002, QE-003, QE-004, QE-007, QE-025)
-- src/input/quick_entry/tests/submit.rs (QE-008, QE-011, QE-015, QE-019, QE-020, QE-022)
+- src/input/quick_entry/tests/submit.rs (QE-008, QE-011, QE-015, QE-016, QE-019, QE-020, QE-022)
 - src/input/tests/edits.rs (QE-014, QE-016, QE-017, QE-023, QE-024)
 - src/input/tests/errors.rs (QE-018)
 - src/logic/validation.rs (QE-008, QE-009, QE-010, QE-011, QE-012, QE-024)
@@ -57,9 +57,9 @@ The run-logging form: prefilled fields, text capture, parsing and run rules, ins
 
 ## Key Findings
 
-1. **Date not normalized after a save** — Date is kept exactly as typed (e.g. `10/12/2026`); Date and Time are not trimmed, so surrounding spaces make them invalid. Not covered by a spec.
+1. **Modifier keys** — Ctrl/Alt + letter types the letter into the focused field.
 
 ## Work Required
 
 ### Nice to Have
-1. Make labels and error messages list every accepted format; trim Date/Time; treat whitespace-only Distance as empty.
+1. Decide whether Ctrl/Alt + letter should be ignored in Quick Entry.

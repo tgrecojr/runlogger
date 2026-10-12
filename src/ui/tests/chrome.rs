@@ -44,7 +44,10 @@ fn help_describes_esc_commands_and_where_direct_keys_work() {
 // @spec NAV-015
 #[test]
 fn help_covers_navigation_quick_entry_run_list_goal_and_data_location() {
-    let help = screen_on(Screen::Help, 100);
+    let mut app = App::new();
+    app.db_location = Some("/scratch/runlogger/runs.db".into());
+    app.switch_to_screen(Screen::Help);
+    let help = buffer_text(&draw_app(&mut app, 100, 40));
     let topics: [(&str, &[&str]); 5] = [
         (
             "navigation keys",
@@ -86,14 +89,90 @@ fn help_covers_navigation_quick_entry_run_list_goal_and_data_location() {
                 "Your streak counts through yesterday until today's mile is logged.",
             ],
         ),
-        (
-            "macOS database location",
-            &["~/Library/Application Support/runlogger/runs.db (macOS)"],
-        ),
+        ("database location in use", &["/scratch/runlogger/runs.db"]),
     ];
     for (topic, lines) in topics {
         for line in lines {
             assert!(help.contains(line), "{topic}: {line:?} missing:\n{help}");
         }
+    }
+}
+
+// @spec NAV-020
+#[test]
+fn footer_becomes_the_esc_menu_while_a_command_key_is_awaited() {
+    let conn = crate::test_support::memory_db();
+    for (screen, menu) in [
+        (
+            Screen::QuickEntry,
+            "Esc → [1] Quick Entry  [2] Run List  [3] Analytics  [h] Help  [Esc] Clear",
+        ),
+        (
+            Screen::RunList,
+            "Esc → [1] Quick Entry  [2] Run List  [3] Analytics  [h] Help",
+        ),
+        (
+            Screen::Analytics,
+            "Esc → [1] Quick Entry  [2] Run List  [3] Analytics  [h] Help",
+        ),
+        (
+            Screen::Help,
+            "Esc → [1] Quick Entry  [2] Run List  [3] Analytics  [h] Help",
+        ),
+    ] {
+        let mut app = App::new();
+        app.switch_to_screen(screen);
+        crate::input::handle_key_event(
+            &mut app,
+            crate::test_support::key(crossterm::event::KeyCode::Esc),
+            &conn,
+        );
+        let buf = draw_app(&mut app, 80, 30);
+        let footer: Vec<String> = buffer_text(&buf)
+            .lines()
+            .rev()
+            .take(3)
+            .map(String::from)
+            .collect();
+        let line = footer
+            .iter()
+            .find(|l| l.contains("Esc →"))
+            .unwrap_or_else(|| panic!("{screen:?}: no Esc menu in {footer:?}"));
+        assert!(line.contains(menu), "{screen:?}: {line}");
+        if screen != Screen::QuickEntry {
+            assert!(!line.contains("[Esc] Clear"), "{screen:?}: {line}");
+        }
+        // The footer's text row is the second-to-last row.
+        let footer_y = buf.area.height - 2;
+        let footer_row: Vec<char> = buffer_text(&buf)
+            .lines()
+            .nth(footer_y as usize)
+            .unwrap()
+            .chars()
+            .collect();
+        let x = (0..footer_row.len())
+            .find(|&i| footer_row[i..].starts_with(&['E', 's', 'c', ' ', '→']))
+            .unwrap();
+        let cell = &buf[(x as u16, footer_y)];
+        assert_eq!(
+            (
+                cell.fg,
+                cell.modifier.contains(ratatui::style::Modifier::BOLD)
+            ),
+            (Color::Cyan, true)
+        );
+
+        // The next key ends the wait and restores the normal footer.
+        crate::input::handle_key_event(
+            &mut app,
+            crate::test_support::key(crossterm::event::KeyCode::Char('x')),
+            &conn,
+        );
+        let after = buffer_text(&draw_app(&mut app, 80, 30));
+        let footer_after: Vec<&str> = after.lines().rev().take(3).collect();
+        assert!(
+            footer_after.iter().all(|l| !l.contains("Esc →")),
+            "{screen:?}: menu still shown: {footer_after:?}"
+        );
     }
 }

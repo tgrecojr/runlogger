@@ -20,7 +20,7 @@ arrows:
     blocks: [quick-entry, run-list, analytics, navigation]
     blockedBy: []
     detail: storage.md
-    next: "Decide unreadable-distance error; schema versioning before the next schema change"
+    next: "Nice-to-have only: remove unused query and index"
     drift: null
 
   quick-entry:
@@ -32,7 +32,7 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: quick-entry.md
-    next: "Nice-to-haves only: trim Date/Time; list accepted formats"
+    next: "Nice-to-have only: decide Ctrl/Alt + letter in Quick Entry"
     drift: null
 
   run-list:
@@ -44,7 +44,7 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: run-list.md
-    next: "Nice-to-have only: keep selection when 2 is pressed on Run List"
+    next: null
     drift: null
 
   analytics:
@@ -56,7 +56,7 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: analytics.md
-    next: "Nice-to-have only: clarify rolling-period labels"
+    next: "Nice-to-have only: tiny-terminal chart"
     drift: null
 
   navigation:
@@ -68,5 +68,5 @@ arrows:
     blocks: []
     blockedBy: [storage]
     detail: navigation.md
-    next: "Nice-to-have only: Esc-prefix indicator; real data path in Help"
+    next: "Nice-to-have only: modifier keys; ui/components stubs; theme colors"
     drift: null

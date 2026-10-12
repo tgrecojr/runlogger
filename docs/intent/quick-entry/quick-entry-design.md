@@ -41,9 +41,9 @@ On Enter, both messages are cleared, then fields are parsed in order Date → Ti
 
 | Field | Accepted | Empty field | Error text |
 |---|---|---|---|
-| Date (`parse_date`) | `%Y-%m-%d`, `%m/%d/%Y`, `%m-%d-%Y` | today | "Invalid date format. Use YYYY-MM-DD" |
-| Time (`parse_time`) | `%H:%M:%S`, `%H:%M`, `%I:%M %p`, `%I:%M:%S %p` | current clock time, truncated to whole seconds | "Invalid time format. Use HH:MM or HH:MM:SS" |
-| Distance (`parse_distance`) | a finite number after trimming (`NaN` and `inf` are rejected) | error | "Distance is required" / "Invalid distance. Enter a number (e.g., 3.5)" |
+| Date (`parse_date`) | `%Y-%m-%d`, `%m/%d/%Y`, `%m-%d-%Y`, after trimming spaces | today | "Invalid date. Use YYYY-MM-DD, MM/DD/YYYY or MM-DD-YYYY" |
+| Time (`parse_time`) | `%H:%M:%S`, `%H:%M`, `%I:%M %p`, `%I:%M:%S %p`, after trimming spaces | current clock time, truncated to whole seconds | "Invalid time. Use HH:MM, HH:MM:SS or h:MM AM/PM" |
+| Distance (`parse_distance`) | a finite number after trimming (`NaN` and `inf` are rejected) | error (also when only spaces) | "Distance is required" / "Invalid distance. Enter a number (e.g., 3.5)" |
 
 Once Date and Time have parsed, and before Distance is checked, the submission's date and time together must not be after the current local date and time (`QE-024`): a date after today is rejected with "Date cannot be in the future", and today's date with a later time with "Time cannot be in the future". Runs record what has happened; a future run would distort the streak and period statistics. The check is a pure function of the submission and the current date-time (`check_not_future` in `validation.rs`), so it can be tested at any fixed "now".
 
@@ -58,7 +58,7 @@ Enter ─▶ clear messages ─▶ parse Date ─▶ parse Time ─▶ parse Dis
      editing_run_id?
        ├─ None ─▶ insert_run ─▶ "Run logged successfully!"
        │                         clear Distance + Note, focus Distance,
-       │                         keep Date, Time := now (whole seconds)
+       │                         Date := saved date as YYYY-MM-DD, Time := now (whole seconds)
        └─ Some(id) ─▶ update_run(id) ─▶ reset form (as Clear),
                                         reload runs, switch to Run List
                                         with run `id` selected
@@ -84,10 +84,10 @@ While in edit mode, switching to Run List or Analytics cancels the edit: the for
 
 ```
 Quick Entry - Log Your Run            ← "Edit Run" while editing
-┌Date (YYYY-MM-DD)──────────────┐
+┌Date (YYYY-MM-DD or MM/DD/YYYY)┐
 │2026-10-12                     │
 └───────────────────────────────┘
-┌Time (HH:MM:SS)────────────────┐
+┌Time (HH:MM or h:MM AM/PM)─────┐
 │07:15:00                       │
 └───────────────────────────────┘
 ┌Distance (miles)───────────────┐   ← focused: yellow border,
@@ -117,14 +117,13 @@ Run logged successfully!              ← red error takes precedence over green 
 | After an edit is saved | Reset the form and return to Run List with the edited run selected | Stay on Quick Entry; return to the top of Run List | The user confirms the change by seeing the run's new values in context, not by reading a message. |
 | Leaving Quick Entry mid-edit | Cancel the edit and reset the form | Keep the edit pending; prompt before leaving | An edit the user walked away from must never overwrite a run later without their noticing. |
 | Save-failure messages | Name the problem and the next step; a duplicate start time gets its own message | Generic "Database error" text | The user should know what went wrong and how to fix it without reading SQLite errors. |
+| Field labels and format errors | Name every accepted form; ignore surrounding spaces; show the saved date as `YYYY-MM-DD` after a save | Name only the canonical form | The user can see what the form accepts without guessing, and the form always ends in the canonical format. |
 | Error reporting | First failing field only, inline in red | Collect all errors; modal popup | Fields are few and the message sits directly under them. |
 
 ## Open Questions & Future Decisions
 
 ### Deferred
-1. **Whitespace-only Distance** passes the empty check (which runs before trimming) and reports "Invalid distance…" instead of "Distance is required".
-2. **Modifier keys** other than Ctrl+Q/Ctrl+C insert their base character into the field.
-3. **Labels and error text undersell accepted formats** — "Time (HH:MM:SS)" and the error messages omit HH:MM, AM/PM and the US date forms.
+1. **Modifier keys** other than Ctrl+Q/Ctrl+C insert their base character into the field.
 
 ## References
 
