@@ -207,6 +207,10 @@ cargo test
 ./target/release/runlogger
 ```
 
+## Contributing
+
+Issues and pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+
 ## License
 
-This is a personal project. Feel free to use and modify as needed.
+Released under the [MIT License](LICENSE).
