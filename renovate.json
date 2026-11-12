@@ -2,6 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
+    "helpers:pinGitHubActionDigests",
     ":disableRateLimiting",
     ":dependencyDashboard",
     ":semanticCommits",
@@ -63,9 +64,7 @@
       "matchPackageNames": [
         "chrono",
         "anyhow",
-        "thiserror",
-        "serde",
-        "tokio"
+        "thiserror"
       ],
       "minimumReleaseAge": "1 day"
     },
@@ -82,6 +81,13 @@
       "labels": [
         "ui-update"
       ]
+    },
+    {
+      "description": "Group all GitHub Actions updates",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "github actions"
     }
   ],
   "vulnerabilityAlerts": {
